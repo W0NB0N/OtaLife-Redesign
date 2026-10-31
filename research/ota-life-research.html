@@ -1,0 +1,405 @@
+<title>Ota Life Teardown</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: single reading column with a sticky section index on wide screens; module cards in a 2-col grid */
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#191b2e; --muted:#5d6180; --line:#dfe2ee;
+  --accent:#2f5bea; --hanko:#d9443a; --gold:#b9821a; --chip:#eaeefc; --warn-bg:#fff4e8; --warn:#a4520c;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12131d; --surface:#1b1d2b; --ink:#eceef8; --muted:#a2a6c4; --line:#2e3146;
+  --accent:#8aa6ff; --hanko:#ff7a6e; --gold:#e8b450; --chip:#252a45; --warn-bg:#2e2214; --warn:#f2a861; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12131d; --surface:#1b1d2b; --ink:#eceef8; --muted:#a2a6c4; --line:#2e3146;
+  --accent:#8aa6ff; --hanko:#ff7a6e; --gold:#e8b450; --chip:#252a45; --warn-bg:#2e2214; --warn:#f2a861; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:calc(24px + env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:6px;font-size:14px}
+nav.toc a{color:var(--muted);text-decoration:none;padding:4px 0}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,5vw,52px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:28px;font-weight:800;margin-bottom:16px}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:68ch}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--hanko)}
+.lede{font-size:18px;color:var(--muted);margin-top:12px}
+header.top{display:flex;flex-direction:column;gap:8px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:24px}
+.facts div{background:var(--surface);padding:14px 16px}
+.facts dt{font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:4px 0 0;font-weight:700;font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:16px}
+.ref{font:500 11px var(--f-mono);color:var(--accent);background:var(--chip);padding:2px 6px;border-radius:4px;white-space:nowrap}
+.mods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.mod .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mod ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.mod li::marker{color:var(--muted)}
+.tag{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--gold)}
+.ia{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px}
+.ia h3{margin-bottom:6px}
+.ia ul{margin:0;padding-left:18px;font-size:15px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:620px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.flow pre.mermaid{margin:0;overflow-x:auto;background:transparent}
+.flow p{font-size:15px;color:var(--muted)}
+.issues{display:flex;flex-direction:column;gap:10px}
+.issue{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.sev{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;align-self:start;padding:3px 8px;border-radius:999px;text-align:center}
+.sev.h{background:var(--warn-bg);color:var(--hanko)}
+.sev.m{background:var(--warn-bg);color:var(--warn)}
+.sev.l{background:var(--chip);color:var(--muted)}
+.issue b{display:block;margin-bottom:2px}
+.issue span{color:var(--muted);font-size:15px}
+.gaps{display:flex;flex-wrap:wrap;gap:8px}
+.gaps span{background:var(--chip);border-radius:999px;padding:6px 12px;font-size:14px}
+.note{font-size:14px;color:var(--muted)}
+a{color:var(--accent)}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}nav.toc{display:none}.mods{grid-template-columns:minmax(0,1fr)}.issue{grid-template-columns:minmax(0,1fr);gap:6px}.sev{justify-self:start}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <a href="#overview">Overview</a>
+  <a href="#ia">App structure</a>
+  <a href="#features">Feature list</a>
+  <a href="#economy">Points economy</a>
+  <a href="#flows">User flows</a>
+  <a href="#issues">UX issues</a>
+  <a href="#gaps">Not yet captured</a>
+  <a href="#screens">Screen index</a>
+</nav>
+
+<main>
+<header class="top" id="overview">
+  <span class="eyebrow">Redesign research · 30 Oct 2026</span>
+  <h1>Ota Life app teardown</h1>
+  <p class="lede">Ota Life is a gamified anime fan app for India: a reel feed, daily quizzes, gacha rewards, community voting, and a shop that sells merch and tickets for the Ōta TOKYO festival. This page maps every feature visible in the 16 screenshots, plus what public listings say, as the input for the redesign.</p>
+  <dl class="facts">
+    <div><dt>Developer</dt><dd>Fun Verth Pvt Ltd</dd></div>
+    <div><dt>First release</dt><dd>21 Apr 2025</dd></div>
+    <div><dt>Version</dt><dd>7.4 · iOS + Android</dd></div>
+    <div><dt>Store category</dt><dd>Social Networking</dd></div>
+    <div><dt>App Store</dt><dd>1,000+ dl · 3.6★ (5)</dd></div>
+    <div><dt>Flagship event</dt><dd>Ōta TOKYO Delhi, 28–29 Nov</dd></div>
+  </dl>
+  <p class="note" style="margin-top:12px">The store copy pitches the app as "all-in-one for anime fans, rooted in Japanese culture", connecting fans in India and Japan. It lists earning 5 pts per 5 seconds of video and 200 pts per correct quiz answer. The festival (Yashobhoomi, Delhi) claims a 15,000-attendee Bangalore edition and targets 50,000 in Delhi; the app is its digital companion and ticket channel.</p>
+</header>
+
+<section id="ia">
+  <h2>App structure</h2>
+  <p>Five bottom tabs, a shared top bar, and a floating notification button that sits on top of every tab.</p>
+  <div class="ia">
+    <div><h3>Global top bar</h3><ul><li>Points balance (2700)</li><li>Gift icon with dot (daily login reward)</li><li>QR scanner</li><li>Profile</li></ul></div>
+    <div><h3>Bottom tabs</h3><ul><li>Feed</li><li>Quiz</li><li>Rewards</li><li>Voting (screen title "Ideas")</li><li>Shop (screen title "Marketplace")</li></ul></div>
+    <div><h3>Floating</h3><ul><li>Notification bell FAB</li><li>"+" create FAB on Voting</li><li>Daily unique-votes bar on Voting</li></ul></div>
+    <div><h3>Before the tabs</h3><ul><li>Splash (event promo)</li><li>Quick Anime Survey</li><li>Sign-in (not captured)</li></ul></div>
+  </div>
+</section>
+
+<section id="features">
+  <h2>Feature list</h2>
+  <p>Grouped by module. Tags in brackets point to the screen index at the bottom.</p>
+  <div class="mods">
+
+    <article class="mod">
+      <div class="hd"><h3>Onboarding</h3><span><span class="ref">S3</span> <span class="ref">S4</span></span></div>
+      <ul>
+        <li>Splash with app logo, three mascots, and the current event ad ("Tickets on sale")</li>
+        <li>Quick Anime Survey, 5 single-choice questions on one page: merch style, T-shirt size, game genre, gaming platform, main goal at an event</li>
+        <li>CTA "Join the Community"</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Feed</h3><span class="ref">S5</span></div>
+      <ul>
+        <li>Category chips: All, Anime, Cosplay, Japan, plus search</li>
+        <li>"Explore Communities" banner (4 trending)</li>
+        <li>"Watch Reels, Earn Points" banner</li>
+        <li>Vertical reel cards from creators (e.g. @animenewsguy)</li>
+        <li>Store listing: BTS stories, Japanese lessons, cosplay reels, fan theories; 5 pts per 5 s watched</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Communities</h3><span><span class="ref">S6</span> <span class="ref">S7</span></span></div>
+      <ul>
+        <li>Search, franchise chips (Naruto/Boruto, One Piece, Dragon Ball, Demon Slayer…)</li>
+        <li>"Create Your Own Community"</li>
+        <li>Trending list: cover, name, category, member count, Join</li>
+        <li>Detail: banner, members, category, description, owner card (role + rank), Instagram link, Join, View Community Feed, Report</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Quiz hub</h3><span><span class="ref">S8</span> <span class="ref">S9</span></span></div>
+      <ul>
+        <li>Daily Challenge card: 1,000 pts + streak bonus</li>
+        <li>Shop promo ("Redeem Now")</li>
+        <li>Streak rule: one quiz a day keeps the streak</li>
+        <li>Daily Quest: 3 tasks (watch a reel, play a quiz, comment on a reel), +1000 on completion, progress bar</li>
+        <li>Badges &amp; Rank: current rank (B-E · Student), percentile, rank perk (cashback / points usage), progress to next rank (Genin, 3,200 pts away), "View all ranks &amp; badges"</li>
+        <li>Stat tiles: day streak, global rank (#3681), XP (1800)</li>
+        <li>My Quiz (played) and All Quizzes lists, each with difficulty and question count</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Quiz play &amp; results</h3><span><span class="ref">S10</span> <span class="ref">S1</span> <span class="ref">S2</span></span></div>
+      <ul>
+        <li>Quiz cover: title, difficulty, question count, Play Now, Check Responses</li>
+        <li>Play: countdown timer, progress bar, 4-option MCQ with selected state, Back / Submit</li>
+        <li>Content style: Japanese words through anime, e.g. ダーリン (daarin)</li>
+        <li>Top Rankings per quiz: medals for top 3, avatar, badges earned, score</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Rewards (gacha)</h3><span class="ref">S11</span></div>
+      <ul>
+        <li>Ticket wallet in three tiers: Standard (Common·Rare), Rare+ (Rare·Epic), Legend↑ (Epic·Legendary)</li>
+        <li>Gacha capsule machine per tier, "No Tickets" disabled state</li>
+        <li>Earn hints: 1 Standard ticket for daily login, 1 for daily quiz</li>
+        <li>My Cabinet: won items (5% OFF coupons) with rarity, expiry, scope, Copy Code</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Voting (Ideas)</h3><span><span class="ref">S12</span> <span class="ref">S13</span> <span class="ref">S14</span></span></div>
+      <ul>
+        <li>Top Pick / Popular carousel with votes vs goal</li>
+        <li>"Have an idea?" create entry</li>
+        <li>Filters: All Ideas, Cosplay Events, Events, Merch…; sort: Newest, Most Popular, Ending Soon, By Progress</li>
+        <li>Idea cards: image, type tag, author, title, location, votes / goal bar</li>
+        <li>Limited daily unique votes (2 / 3)</li>
+        <li>Detail: gallery, creator, location, multi-option vote, overview text, comments with likes</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Shop (Marketplace)</h3><span><span class="ref">S15</span> <span class="ref">S16</span></span></div>
+      <ul>
+        <li>Search; "Can't find it? Submit your idea"; "Redeem your Ōta coins"</li>
+        <li>Featured products, featured shops (user-run shops)</li>
+        <li>All products: filter All / Merch / Events; sort by popularity, newest, price</li>
+        <li>Product types: event tickets (Rs. 99–299) and licensed merch (Rs. 635–1,799)</li>
+        <li>Detail: gallery, type, price, long description, ticket tiers in text (General, Prime, VIP), date + venue, creator info (verified), Comments / Reviews tabs, sticky total + Book Now</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Account &amp; utilities</h3><span class="tag">partly inferred</span></div>
+      <ul>
+        <li>Profile: day streak, quiz points, purchases, tickets (store listing)</li>
+        <li>QR scanner, likely event check-in or in-venue rewards</li>
+        <li>Daily gift with unread dot</li>
+        <li>Notifications centre</li>
+      </ul>
+    </article>
+
+    <article class="mod">
+      <div class="hd"><h3>Progression ladder</h3><span class="tag">partly inferred</span></div>
+      <ul>
+        <li>Ninja-style ranks: Student (Academy trainee) → Genin → higher ranks</li>
+        <li>Each rank has a badge and perks (cashback %, points usage in shop)</li>
+        <li>Badges also come from quizzes and show on leaderboards and community owner cards</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section id="economy">
+  <h2>Points economy</h2>
+  <p>Four separate counters run at once. This is the core of the gamification and the part a redesign most needs to make legible.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Currency</th><th>Earned by</th><th>Spent on / unlocks</th><th>Seen as</th></tr></thead>
+    <tbody>
+      <tr><td><b>Points / Ōta coins</b></td><td>Reels (5 pts / 5 s), quiz answers (200 each), daily challenge (1,000), daily quest (+1,000)</td><td>Shop discounts, redemption</td><td class="n">2700 in top bar</td></tr>
+      <tr><td><b>XP</b></td><td>Quiz activity</td><td>Rank ladder (Student → Genin)</td><td class="n">1800 on Quiz tab</td></tr>
+      <tr><td><b>Gacha tickets</b></td><td>Daily login, daily quiz</td><td>Capsule pulls → coupons in Cabinet</td><td class="n">0 total</td></tr>
+      <tr><td><b>Unique votes</b></td><td>Daily allowance</td><td>Voting on ideas</td><td class="n">2 / 3 today</td></tr>
+      <tr><td><b>Streak</b></td><td>≥1 quiz per day</td><td>Streak bonus on daily challenge</td><td class="n">1 day</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="flows">
+  <h2>User flows</h2>
+
+  <div class="flow">
+    <h3>1 · First launch</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Splash + event ad] --> B[Sign in / sign up<br/><i>not captured</i>]
+  B --> C[Quick Anime Survey<br/>5 questions]
+  C --> D[Join the Community]
+  D --> E[Feed tab]
+</pre>
+  </div>
+
+  <div class="flow">
+    <h3>2 · Daily loop (the retention engine)</h3>
+<pre class="mermaid">
+flowchart TD
+  O[Open app] --> G[Claim daily gift<br/>+1 Standard ticket]
+  O --> Q[Quiz tab]
+  Q --> DC[Daily Challenge quiz]
+  DC --> S[Streak +1<br/>points + ticket]
+  O --> F[Feed]
+  F --> R[Watch a reel] --> P1[Points per 5 s]
+  R --> CM[Comment on reel]
+  S --> DQ{Daily Quest<br/>3/3 done?}
+  P1 --> DQ
+  CM --> DQ
+  DQ -- yes --> B[+1000 bonus]
+  B --> W[Points wallet]
+  S --> W
+  W --> SH[Shop discounts]
+  G --> GA[Gacha pull] --> CB[Coupon in Cabinet] --> SH
+  O --> V[Voting: spend 3 daily votes]
+</pre>
+  </div>
+
+  <div class="flow">
+    <h3>3 · Play a quiz</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Quiz tab] --> B[Pick Daily Challenge<br/>or any quiz]
+  B --> C[Quiz cover<br/>Play Now]
+  C --> D[Question 1..5<br/>timer, MCQ]
+  D -->|Submit| E[Results<br/><i>not captured</i>]
+  E --> F[Top Rankings]
+  C --> G[Check Responses<br/>review answers]
+  E --> H[XP to rank, points,<br/>quest + streak update]
+</pre>
+  </div>
+
+  <div class="flow">
+    <h3>4 · Find and join a community</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Feed] --> B[Explore Communities]
+  B --> C[Search / franchise chip]
+  B --> D[Trending list]
+  C --> E[Community detail]
+  D --> E
+  D -->|quick| J[Join]
+  E --> J
+  E --> K[View Community Feed]
+  E --> L[Report]
+  B --> M[Create Your Own Community]
+</pre>
+  </div>
+
+  <div class="flow">
+    <h3>5 · Vote on an idea, or pitch one</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Voting tab] --> B[Filter / sort]
+  B --> C[Idea card]
+  C --> D[Idea detail]
+  D --> E[Select option(s)] --> F[Vote<br/>uses 1 of 3 daily votes]
+  D --> G[Comment / like]
+  A --> H[Have an idea? +] --> I[Create idea<br/><i>not captured</i>]
+  F --> J[Goal reached → idea becomes<br/>merch / event / guest]
+</pre>
+  </div>
+
+  <div class="flow">
+    <h3>6 · Buy a ticket or merch</h3>
+<pre class="mermaid">
+flowchart LR
+  A[Shop tab] --> B[Featured / All products]
+  B --> C[Product detail]
+  C --> D[Book Now / Buy Now]
+  D --> E[Tier, coupon, points,<br/>payment <i>not captured</i>]
+  E --> F[Ticket in Profile]
+  F --> G[QR scan at venue]
+  R[Rewards Cabinet coupon] -.-> E
+</pre>
+  </div>
+</section>
+
+<section id="issues">
+  <h2>UX issues in the current build</h2>
+  <p>Observed directly in the screenshots. These are the problems the redesign should fix, before any visual style is chosen.</p>
+  <div class="issues">
+    <div class="issue"><span class="sev h">High</span><div><b>Five currencies, no explanation</b><span>Points, XP, gacha tickets, daily votes and streak each live on a different tab. Store copy says 200 pts per answer while the app shows 1,000 pts per challenge. Users can't tell what earns what.</span></div></div>
+    <div class="issue"><span class="sev h">High</span><div><b>Leaderboard has no tiebreak</b><span>Every visible player scores 1000, so rank order looks arbitrary. Time taken or streak should break ties.</span></div></div>
+    <div class="issue"><span class="sev h">High</span><div><b>Ticket tiers hidden in body text</b><span>General / Prime / VIP are described in a long paragraph, while the CTA shows a single Rs. 299 "Book Now". There's no tier selector before checkout.</span></div></div>
+    <div class="issue"><span class="sev h">High</span><div><b>Notification FAB collides with content</b><span>On Voting the bell renders over every card and stacks over the "+" FAB. On Quiz it covers the Daily Quest list.</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Vote goals are meaningless</b><span>1,720 votes against a 100 goal; every bar is pinned at 100%, so progress tells you nothing.</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Gacha dead end at 0 tickets</b><span>The main screen of the Rewards tab is a disabled button. The earn hints are text, not actions that link to the quiz or the login reward.</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Conflicting difficulty labels</b><span>"…Beginner" and "…Advanced" quizzes are both tagged "Intermediate".</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Tab names don't match screen titles</b><span>Voting opens "Ideas", Shop opens "Marketplace". The top bar repeats the same four icons on every tab.</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Survey is a long form</b><span>Five questions on one scroll, no progress, no skip, and T-shirt size asked before the user has seen the app.</span></div></div>
+    <div class="issue"><span class="sev m">Medium</span><div><b>Ranks and badges are illegible</b><span>Tiny unlabeled badge icons; "B-E" rank code is unexplained; perks ("0% Cashback / No Points Usage") read as a penalty.</span></div></div>
+    <div class="issue"><span class="sev l">Low</span><div><b>Test data in production</b><span>A community named "Name / Test", a shop called "Test", blank placeholder covers in Featured Shops.</span></div></div>
+    <div class="issue"><span class="sev l">Low</span><div><b>Copy carried over from another template</b><span>An artist poll is headed "Vote for Your Favorite Design"; the disabled vote CTA has low contrast; stray decorative shapes overlap the cards.</span></div></div>
+    <div class="issue"><span class="sev l">Low</span><div><b>Quiz feedback is unclear</b><span>The timer is always red, and there's no visible right/wrong reveal or reward moment after Submit.</span></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Pointers for the gamified redesign</h2>
+  <p>Style is still open. These follow from the structure, whatever the look ends up being.</p>
+  <div class="mods">
+    <article class="mod"><h3>One wallet, one level</h3><ul><li>Merge points and coins; show XP as a level bar on the avatar</li><li>Tickets and votes become "energy" items in the same wallet sheet</li><li>Every reward animates into the wallet</li></ul></article>
+    <article class="mod"><h3>A home that is a quest board</h3><ul><li>Today's quests, streak flame, and gacha tickets on one screen</li><li>Each quest row is a button that jumps to the task</li></ul></article>
+    <article class="mod"><h3>Use the mascots</h3><ul><li>The three splash characters (pink girl, hamster, husky) can guide onboarding, cheer quiz results, and fill empty states</li></ul></article>
+    <article class="mod"><h3>Make the ninja ladder a map</h3><ul><li>Student → Genin → … as a visible path with perks at each stop</li><li>Badges get names and unlock conditions</li></ul></article>
+    <article class="mod"><h3>Quiz as a game round</h3><ul><li>Instant right/wrong feedback, combo meter, results card with points, XP, ticket earned, and rank change</li><li>Leaderboard with time tiebreak and "you" pinned</li></ul></article>
+    <article class="mod"><h3>The event as a season</h3><ul><li>Countdown to Ōta TOKYO, season pass progress, ticket in a wallet with QR</li><li>Votes and quizzes feed into event perks</li></ul></article>
+  </div>
+</section>
+
+<section id="gaps">
+  <h2>Not yet captured</h2>
+  <p>These screens are referenced but weren't in the screenshots. Grab them before wireframing.</p>
+  <div class="gaps">
+    <span>Sign in / sign up</span><span>Profile</span><span>Quiz results</span><span>Check Responses</span><span>Gacha pull animation</span><span>All ranks &amp; badges</span><span>Daily gift sheet</span><span>QR scanner</span><span>Notifications</span><span>Reel player &amp; comments</span><span>Community feed</span><span>Create community</span><span>Create idea</span><span>Shop detail page</span><span>Checkout &amp; tier pick</span><span>Search results</span>
+  </div>
+</section>
+
+<section id="screens">
+  <h2>Screen index</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Ref</th><th>Screen</th><th>Tab</th></tr></thead>
+    <tbody>
+      <tr><td class="n">S1</td><td>Quiz question (MCQ, timer)</td><td>Quiz</td></tr>
+      <tr><td class="n">S2</td><td>Top Rankings leaderboard</td><td>Quiz</td></tr>
+      <tr><td class="n">S3</td><td>Splash / event ad</td><td>Launch</td></tr>
+      <tr><td class="n">S4</td><td>Quick Anime Survey</td><td>Onboarding</td></tr>
+      <tr><td class="n">S5</td><td>Feed home</td><td>Feed</td></tr>
+      <tr><td class="n">S6</td><td>Communities search + trending</td><td>Feed</td></tr>
+      <tr><td class="n">S7</td><td>Community detail</td><td>Feed</td></tr>
+      <tr><td class="n">S8</td><td>Quiz hub (top)</td><td>Quiz</td></tr>
+      <tr><td class="n">S9</td><td>Quiz hub (full scroll)</td><td>Quiz</td></tr>
+      <tr><td class="n">S10</td><td>Quiz cover</td><td>Quiz</td></tr>
+      <tr><td class="n">S11</td><td>Gacha + Cabinet</td><td>Rewards</td></tr>
+      <tr><td class="n">S12</td><td>Ideas (top)</td><td>Voting</td></tr>
+      <tr><td class="n">S13</td><td>Ideas (full scroll)</td><td>Voting</td></tr>
+      <tr><td class="n">S14</td><td>Idea detail + vote</td><td>Voting</td></tr>
+      <tr><td class="n">S15</td><td>Marketplace</td><td>Shop</td></tr>
+      <tr><td class="n">S16</td><td>Product detail (event ticket)</td><td>Shop</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Sources: <a href="https://mwm.ai/apps/ota-life/6743555476">mwm.ai store-listing summary</a> (third-party), <a href="https://www.district.in/events/ta-tokyo-delhi-dive-into-tokyo-2026-buy-tickets">District event page</a>, and the in-app product description (S16). Items marked "inferred" are educated guesses from UI cues.</p>
+</section>
+</main>
+</div>

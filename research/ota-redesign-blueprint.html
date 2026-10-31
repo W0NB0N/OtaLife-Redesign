@@ -1,0 +1,623 @@
+<title>Ōta Redesign Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: reading column + sticky index; each mascot owns a colour that tags every rule, flow node and moment it owns */
+:root{
+  --bg:#f5f6fb; --surface:#ffffff; --ink:#191b2e; --muted:#5b5f7e; --line:#dde0ee; --chip:#eceffa;
+  --taku:#4f73c4; --taku-bg:#e3eaf8;
+  --momo:#cf3f4b; --momo-bg:#fbe3e5;
+  --puri:#a87a0c; --puri-bg:#fbf0d2;
+  --ora:#6a4be0; --ora-bg:#ece7ff;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11121b; --surface:#1a1c2a; --ink:#eceef8; --muted:#a3a7c4; --line:#2d3046; --chip:#24283f;
+  --taku:#9bb6f2; --taku-bg:#1f2a45; --momo:#ff8c93; --momo-bg:#3a1e24; --puri:#f2c757; --puri-bg:#352a10; --ora:#b4a2ff; --ora-bg:#2a2350; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11121b; --surface:#1a1c2a; --ink:#eceef8; --muted:#a3a7c4; --line:#2d3046; --chip:#24283f;
+  --taku:#9bb6f2; --taku-bg:#1f2a45; --momo:#ff8c93; --momo-bg:#3a1e24; --puri:#f2c757; --puri-bg:#352a10; --ora:#b4a2ff; --ora-bg:#2a2350; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:190px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:calc(24px + env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:4px;font-size:14px}
+nav.toc a{color:var(--muted);text-decoration:none;padding:3px 0}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--ora)}
+main{min-width:0;display:flex;flex-direction:column;gap:64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,5vw,54px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:28px;font-weight:800}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:70ch}
+a{color:var(--ora)}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ora)}
+.lede{font-size:18px;color:var(--muted)}
+section,header.top{display:flex;flex-direction:column;gap:16px}
+.note{font-size:14px;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:13px}
+
+/* mascot sprites cropped from the reference sheet */
+.sprite{--s:.62;flex:none;background:url(assets/mascots.png) no-repeat;background-size:calc(1038px * var(--s)) auto;
+  background-position:calc(var(--x) * var(--s) * -1px) calc(var(--y) * var(--s) * -1px);
+  width:calc(var(--w) * var(--s) * 1px);height:calc(var(--h) * var(--s) * 1px)}
+.sp-taku{--x:95;--y:158;--w:170;--h:214}
+.sp-momo{--x:420;--y:172;--w:185;--h:196}
+.sp-puri{--x:760;--y:188;--w:190;--h:172}
+.sticker{background:#fff;border-radius:18px;padding:10px;display:grid;place-items:center;width:136px;height:150px;flex:none}
+
+.cast{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mascot{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.mascot.taku{--c:var(--taku);--cb:var(--taku-bg)} .mascot.momo{--c:var(--momo);--cb:var(--momo-bg)} .mascot.puri{--c:var(--puri);--cb:var(--puri-bg)}
+.mascot .role{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.mascot .stickrow{display:flex;gap:14px;align-items:center}
+.mascot .stickrow .sticker{background:#fff;box-shadow:0 0 0 3px var(--cb)}
+.mascot ul{margin:0;padding-left:18px;font-size:15px;display:flex;flex-direction:column;gap:3px}
+.voice{background:var(--cb);border-radius:10px;padding:10px 12px;font-size:15px}
+.voice b{color:var(--c)}
+
+.pill{display:inline-block;font:500 11px var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.p-taku{background:var(--taku-bg);color:var(--taku)} .p-momo{background:var(--momo-bg);color:var(--momo)}
+.p-puri{background:var(--puri-bg);color:var(--puri)} .p-ora{background:var(--ora-bg);color:var(--ora)} .p-all{background:var(--chip);color:var(--muted)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:680px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface)}
+tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.box ul{margin:0;padding-left:18px;font-size:15px;display:flex;flex-direction:column;gap:3px}
+.rule{display:flex;gap:12px;align-items:flex-start}
+.rule .k{font:800 22px var(--f-display);color:var(--ora);min-width:28px;line-height:1.2}
+
+/* Ōra banner */
+.orabar{border-radius:16px;padding:22px;background:var(--ora-bg);display:flex;flex-direction:column;gap:14px}
+.orabar .big{font:800 clamp(28px,4vw,40px) var(--f-display);color:var(--ora)}
+.track{position:relative;height:14px;border-radius:999px;background:var(--surface);overflow:hidden;border:1px solid var(--line)}
+.track i{position:absolute;inset:0 auto 0 0;width:38%;background:var(--ora);border-radius:999px}
+.ticks{display:flex;justify-content:space-between;font:500 11px var(--f-mono);color:var(--muted);flex-wrap:wrap;gap:6px}
+
+/* rank frames */
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px}
+.fr{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13px}
+.av{width:64px;height:64px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font:800 20px var(--f-display);color:var(--muted);position:relative}
+.f0{box-shadow:0 0 0 3px var(--line)}
+.f1{box-shadow:0 0 0 3px #f3a9bd,0 0 0 6px var(--surface),0 0 0 8px #f3a9bd}
+.f2{box-shadow:0 0 0 4px #2bb3a7}
+.f3{box-shadow:0 0 0 3px #8d5cff,0 0 12px 4px #8d5cff88}
+.f4{box-shadow:0 0 0 5px #d3a12a,0 0 0 7px #7a5b10}
+.f5{box-shadow:0 0 0 4px #c72d35,0 0 0 8px #d3a12a}
+.f6{box-shadow:0 0 0 4px #fff,0 0 16px 6px #b4a2ff,0 0 26px 10px #ff8c9366}
+@media (prefers-reduced-motion:no-preference){.f6{animation:aura 3s ease-in-out infinite}}
+@keyframes aura{50%{box-shadow:0 0 0 4px #fff,0 0 22px 8px #8aa6ff,0 0 32px 12px #f2c75766}}
+.fr b{font-family:var(--f-display);font-size:15px}
+
+/* comment mock */
+.comments{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 18px;max-width:560px}
+.cm{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.cm:last-child{border-bottom:0}
+.cm .av{width:44px;height:44px;font-size:15px;flex:none}
+.cm .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.cm .meta b{font-size:15px}
+.cm p{font-size:15px;margin-top:2px}
+.title-chip{font:500 11px var(--f-mono);padding:1px 7px;border-radius:6px;background:var(--chip);color:var(--muted)}
+.mini{font-size:12px;color:var(--muted)}
+
+/* boss cutscene beats */
+.beats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.beat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.beat .t{font:500 11px var(--f-mono);color:var(--ora)}
+.beat p{font-size:14px}
+
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.flow pre.mermaid{margin:0;overflow-x:auto;background:transparent}
+.flow .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.flow p{font-size:15px;color:var(--muted)}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+
+ol.script{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;max-width:74ch}
+ol.script li::marker{font-family:var(--f-mono);color:var(--ora)}
+
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}nav.toc{display:none}.cast,.grid3{grid-template-columns:minmax(0,1fr)}.beats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.grid2{grid-template-columns:minmax(0,1fr)}.beats{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <a href="#cast">The cast</a>
+  <a href="#nav">Navigation</a>
+  <a href="#ora">Ōra system</a>
+  <a href="#ranks">Rank ladder</a>
+  <a href="#boss">Boss cutscenes</a>
+  <a href="#identity">Avatars &amp; frames</a>
+  <a href="#loops">Daily systems</a>
+  <a href="#gacha">Gacha</a>
+  <a href="#council">Fan Council</a>
+  <a href="#flows">User flows</a>
+  <a href="#moments">Mascot moments</a>
+  <a href="#fixes">UX fixes</a>
+  <a href="#demo">Demo script</a>
+</nav>
+
+<main>
+<header class="top">
+  <span class="eyebrow">Redesign · user flow &amp; progression · v1</span>
+  <h1>Ōta redesign blueprint</h1>
+  <p class="lede">Three mascots run the app, and one power stat, Ōra, measures everything you do in it. This page fixes the rules: who owns what, how Ōra is earned and spent, the six ranks and their bosses, how rank shows up on your avatar, and the flows a demo needs to walk through. Visual style comes later.</p>
+</header>
+
+<!-- ===== CAST ===== -->
+<section id="cast">
+  <h2>The cast</h2>
+  <p>Each mascot owns a domain, a colour and a tone of voice. Wherever their domain appears, they appear: as the screen host, in empty states, in reward moments and in notifications. All three show up together only for the biggest moments: first launch, rank-ups and legendary pulls.</p>
+  <div class="cast">
+    <article class="mascot taku">
+      <div class="stickrow"><div class="sticker"><div class="sprite sp-taku" role="img" aria-label="TAKU-kun, blue husky with a backpack"></div></div>
+        <div><span class="role">Discover</span><h3>TAKU-kun</h3><span class="mini">The Ultimate Akiba Otaku</span></div></div>
+      <ul><li>Discover tab: reels, Media Zone</li><li>Communities</li><li>Japanese word-of-the-day and lesson quizzes</li><li>Fan Council (submitting and cheering ideas)</li></ul>
+      <div class="voice"><b>Voice:</b> excitable, knows every reference, explains Japanese words. Signature move: wotagei glowstick dance.</div>
+    </article>
+    <article class="mascot puri">
+      <div class="stickrow"><div class="sticker"><div class="sprite sp-puri" role="img" aria-label="Puri-kun, round yellow hamster-like gamer"></div></div>
+        <div><span class="role">Compete</span><h3>Puri-kun</h3><span class="mini">The Hardcore Gamer</span></div></div>
+      <ul><li>Battle tab: quiz battles</li><li>Daily Challenge</li><li>Leaderboards and Weekly Arena</li><li>Boss fights (leads the attack)</li></ul>
+      <div class="voice"><b>Voice:</b> short, gamer slang, trash-talks bosses, never you. Easter egg: pulls a game console out of his mouth.</div>
+    </article>
+    <article class="mascot momo">
+      <div class="stickrow"><div class="sticker"><div class="sprite sp-momo" role="img" aria-label="Momo-chan, pink idol with a red bow"></div></div>
+        <div><span class="role">Celebrate</span><h3>Momo-chan</h3><span class="mini">The Rising Debut Idol</span></div></div>
+      <ul><li>Stage tab: events, tickets, shop</li><li>Capsule machine (gacha) and Cabinet</li><li>Streaks and daily check-in</li><li>Announces Fan Council winners</li></ul>
+      <div class="voice"><b>Voice:</b> warm, hypes you up, counts down to her debut at Ōta TOKYO on 28 Nov. Signature move: idol wink with a confetti burst.</div>
+    </article>
+  </div>
+  <div class="box"><h3>Partner mascot</h3><p>In onboarding you pick one mascot as your partner. Your partner greets you on Home, delivers your star-up toasts, lends a costume piece to your avatar, and lands the finishing blow in your boss fights. It has no effect on how much Ōra you earn, and you can switch partners any time from your profile.</p></div>
+</section>
+
+<!-- ===== NAV ===== -->
+<section id="nav">
+  <h2>Navigation</h2>
+  <p>Five tabs. Home sits in the centre and each mascot hosts one tab, so a tab's colour tells you who you're with. The tab label and the screen title always match.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Tab</th><th>Host</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td><b>Discover</b></td><td><span class="pill p-taku">TAKU</span></td><td>Reel feed with chips (Anime, Cosplay, Japan, Learn) · Communities · Fan Council · Word of the day</td></tr>
+      <tr><td><b>Battle</b></td><td><span class="pill p-puri">Puri</span></td><td>Daily Challenge · Quiz library by franchise and difficulty · Weekly Arena · Leaderboards · Battle history</td></tr>
+      <tr><td><b>Home</b> (centre)</td><td><span class="pill p-all">All three</span></td><td>Ōra bar and rank · Quest board (daily + weekly) · Streak flame · Ticket count with "Pull" button · Event countdown · Mascot inbox</td></tr>
+      <tr><td><b>Stage</b></td><td><span class="pill p-momo">Momo</span></td><td>Event hub (Ōta TOKYO Delhi) · Shop (merch + tickets) · Capsule machine · My tickets (QR) · Cabinet</td></tr>
+      <tr><td><b>Me</b></td><td><span class="pill p-all">Partner</span></td><td>Avatar and frame · Rank journey map with defeated bosses · Badges and titles · Partner switch · Settings</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="box"><h3>Top bar on every tab</h3><ul><li>Your avatar in its rank frame (opens Me)</li><li>Ōra chip with a ring showing progress to the next star</li><li>Inbox: messages from the mascots, colour-coded by sender</li></ul></div>
+    <div class="box"><h3>Removed from the old app</h3><ul><li>The floating bell button that covered content (moved to the inbox)</li><li>The always-visible QR icon (now a "Check in" chip on Home and Stage on event days only)</li><li>The duplicate gift icon (check-in now lives on the quest board)</li></ul></div>
+  </div>
+</section>
+
+<!-- ===== ORA ===== -->
+<section id="ora">
+  <h2>Ōra: the one power stat</h2>
+  <p>Ōra replaces points, coins, XP and the separate rank score. Everything you do earns Ōra, every rank is an Ōra threshold, and the shop and capsule machine take Ōra.</p>
+  <div class="orabar">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><span class="big">4,350 Ōra</span><span class="pill p-ora">Senpai ★ · 2,650 to Senpai ★★</span></div>
+    <div class="track" aria-hidden="true"><i></i></div>
+    <div class="ticks"><span>Shoshinsha 0</span><span>Kōhai 500</span><span>Senpai 3,000</span><span>Otaku 10,000</span><span>Sensei 25,000</span><span>Shōgun 60,000</span><span>Kami 120,000</span></div>
+    <span class="note">Example top-bar state, shown as it would appear on Home.</span>
+  </div>
+  <div class="grid3">
+    <div class="box rule"><span class="k">1</span><div><h3>Two numbers, one currency</h3><p>Your <b>Power</b> is all the Ōra you've ever earned and sets your rank. Your <b>Wallet</b> is what you can spend.</p></div></div>
+    <div class="box rule"><span class="k">2</span><div><h3>Spending never lowers rank</h3><p>Buying a capsule pull takes Ōra from your Wallet. Your Power stays the same, so nobody is afraid to spend.</p></div></div>
+    <div class="box rule"><span class="k">3</span><div><h3>Every gain is visible</h3><p>Each reward flies into the top-bar chip with a breakdown ("+150 Quiz · ×1.2 streak").</p></div></div>
+  </div>
+
+  <h3 style="margin-top:8px">Earning Ōra</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Action</th><th>Owner</th><th>Ōra</th><th>Daily cap / rule</th></tr></thead>
+    <tbody>
+      <tr><td>Daily check-in</td><td><span class="pill p-momo">Momo</span></td><td class="n">20</td><td>Once a day, plus 1 Standard ticket</td></tr>
+      <tr><td>Daily Challenge, per correct answer</td><td><span class="pill p-puri">Puri</span></td><td class="n">30</td><td>5 questions</td></tr>
+      <tr><td>Daily Challenge, completed</td><td><span class="pill p-puri">Puri</span></td><td class="n">100</td><td>Keeps your streak, plus 1 Standard ticket</td></tr>
+      <tr><td>Any other quiz, per correct answer</td><td><span class="pill p-puri">Puri</span></td><td class="n">20</td><td>First play of each quiz only, 5 quizzes a day</td></tr>
+      <tr><td>Perfect score bonus</td><td><span class="pill p-puri">Puri</span></td><td class="n">50</td><td>Per quiz</td></tr>
+      <tr><td>Weekly Arena finish (top 3 of your bracket)</td><td><span class="pill p-puri">Puri</span></td><td class="n">300 / 200 / 100</td><td>Weekly</td></tr>
+      <tr><td>Watch a reel to the end</td><td><span class="pill p-taku">TAKU</span></td><td class="n">10</td><td>10 reels a day</td></tr>
+      <tr><td>Learn the word of the day</td><td><span class="pill p-taku">TAKU</span></td><td class="n">20</td><td>Once a day</td></tr>
+      <tr><td>Comment</td><td><span class="pill p-taku">TAKU</span></td><td class="n">10</td><td>5 a day</td></tr>
+      <tr><td>Cheer a Fan Council idea</td><td><span class="pill p-taku">TAKU</span></td><td class="n">10</td><td>Per Cheer spent</td></tr>
+      <tr><td>Your idea clears a stage</td><td><span class="pill p-taku">TAKU</span></td><td class="n">200</td><td>Per stage</td></tr>
+      <tr><td>Daily quest board cleared (3 tasks)</td><td><span class="pill p-all">Home</span></td><td class="n">150</td><td>Plus 1 Standard ticket</td></tr>
+      <tr><td>Weekly quest board cleared (7 tasks)</td><td><span class="pill p-all">Home</span></td><td class="n">500</td><td>Plus 1 Rare+ ticket</td></tr>
+      <tr><td>Purchase in the shop</td><td><span class="pill p-momo">Momo</span></td><td class="n">1 per ₹10</td><td>Paid with money, not Ōra</td></tr>
+      <tr><td>Event check-in by QR</td><td><span class="pill p-momo">Momo</span></td><td class="n">1,000</td><td>Per event day, plus 1 Legend ticket</td></tr>
+      <tr><td>Event booth stamp by QR</td><td><span class="pill p-momo">Momo</span></td><td class="n">100</td><td>Per booth</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Streak multiplier applies to all daily Ōra: 3 days ×1.1, 7 days ×1.2, 30 days ×1.3, 100 days ×1.5. A typical engaged day earns about 600–750 Ōra.</p>
+
+  <h3 style="margin-top:8px">Spending Ōra</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Sink</th><th>Cost</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Standard capsule pull</td><td class="n">300</td><td>When you have no Standard ticket</td></tr>
+      <tr><td>Rare+ capsule pull</td><td class="n">1,200</td><td>Unlocks at Senpai</td></tr>
+      <tr><td>Shop discount</td><td class="n">10 Ōra = ₹1</td><td>Slider at checkout, capped by rank (see ladder)</td></tr>
+      <tr><td>Streak Encore (shield)</td><td class="n">500</td><td>Hold up to 2</td></tr>
+      <tr><td>Cosmetics shop (avatar parts, stickers)</td><td class="n">150–2,000</td><td>Frames can't be bought; they come from rank only</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===== RANKS ===== -->
+<section id="ranks">
+  <h2>Rank ladder</h2>
+  <p>Six ranks above the starting rank. Each rank has three stars at even steps of Power. A <b>star-up</b> is a quick toast from your partner. A <b>rank-up</b> is a boss fight cutscene. Onboarding is tuned so every new user reaches Kōhai, and sees their first boss, in the first session.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Rank</th><th>Power</th><th>Typical time</th><th>Gate boss</th><th>Unlocks</th></tr></thead>
+    <tbody>
+      <tr><td><b>Shoshinsha</b><br><span class="mini">Beginner</span></td><td class="n">0</td><td>Start</td><td>None</td><td>Plain frame · 3 Cheers a day</td></tr>
+      <tr><td><b>Kōhai</b><br><span class="mini">Junior</span></td><td class="n">500</td><td>Onboarding</td><td>Spoiler Kappa</td><td>Sakura frame · comments show your title · 5% shop discount cap</td></tr>
+      <tr><td><b>Senpai</b><br><span class="mini">Senior</span></td><td class="n">3,000</td><td>~5 days</td><td>Filler Tanuki</td><td>Teal ribbon frame · 4 Cheers · Rare+ pulls with Ōra · free Standard pull weekly · 10% cap</td></tr>
+      <tr><td><b>Otaku</b></td><td class="n">10,000</td><td>~3 weeks</td><td>Buffering Tengu</td><td>Neon Akiba frame · submit Fan Council ideas · 24 h early ticket access · 15% cap</td></tr>
+      <tr><td><b>Sensei</b><br><span class="mini">Master</span></td><td class="n">25,000</td><td>~2 months</td><td>Sold-Out Oni</td><td>Gold brush frame · 5 Cheers · priority entry lane at events · Legend ticket each rank-up from here · 20% cap</td></tr>
+      <tr><td><b>Shōgun</b></td><td class="n">60,000</td><td>~4 months</td><td>Burnout Yuki-onna</td><td>Crimson kabuto frame · meet-and-greet raffle entry per event · 25% cap</td></tr>
+      <tr><td><b>Kami</b><br><span class="mini">Legend</span></td><td class="n">120,000</td><td>~7 months</td><td>Doomscroll Daimaō</td><td>Animated Ōra aura frame · 6 Cheers · one free General Pass per festival · 25% cap</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Boss names are original yokai-style villains, each one a thing otaku hate: spoilers, filler episodes, buffering, sold-out merch, burnout, endless scrolling. Times assume a typical engaged day; event check-ins speed things up.</p>
+</section>
+
+<!-- ===== BOSS ===== -->
+<section id="boss">
+  <h2>Boss cutscenes</h2>
+  <p>A rank-up fires when Power crosses a threshold, wherever that happens. The cutscene runs full screen, lasts about 8 seconds, and can be skipped after the first beat. Every boss you beat is kept in your journey map on Me, where you can replay its fight.</p>
+  <div class="beats">
+    <div class="beat"><span class="t">0.0 s · Lock-in</span><h3>Ōra overload</h3><p>The Ōra bar overflows and the screen cracks into a battle arena.</p></div>
+    <div class="beat"><span class="t">1.5 s · Boss intro</span><h3>Gate boss appears</h3><p>Name card slams in ("SPOILER KAPPA blocks the way to Kōhai!").</p></div>
+    <div class="beat"><span class="t">3.0 s · Team-up</span><h3>Mascots attack</h3><p>Puri leads, TAKU and Momo join with their signature moves.</p></div>
+    <div class="beat"><span class="t">5.0 s · Finisher</span><h3>Partner + you</h3><p>Your avatar and partner fire the Ōra beam. Boss poofs into sparkles.</p></div>
+    <div class="beat"><span class="t">6.5 s · Spoils</span><h3>Reward reveal</h3><p>New frame snaps onto your avatar, new title, perks list, ticket drop. "Share" and "Continue".</p></div>
+  </div>
+  <div class="grid2">
+    <div class="box"><h3>Rules</h3><ul><li>The fight always ends in a win. It's a celebration, not a test.</li><li>The cutscene waits if you're mid-quiz or mid-checkout, and plays at the next natural pause.</li><li>Your partner gets the finishing blow and a line written for that boss.</li><li>Reduced-motion setting swaps it for a still comic-panel sequence.</li></ul></div>
+    <div class="box"><h3>Star-ups (no boss)</h3><ul><li>Partner pops in from the screen edge with a one-line cheer</li><li>Ōra chip ring refills, star count bumps</li><li>+1 Standard ticket</li><li>Lasts 2 seconds and never blocks input</li></ul></div>
+  </div>
+</section>
+
+<!-- ===== IDENTITY ===== -->
+<section id="identity">
+  <h2>Avatars, frames and titles</h2>
+  <p>Your rank goes everywhere your name does: comments, leaderboards, community member lists, Fan Council idea cards and community owner cards.</p>
+  <div class="frames">
+    <div class="fr"><div class="av f0">S</div><b>Shoshinsha</b><span class="mini">Paper</span></div>
+    <div class="fr"><div class="av f1">K</div><b>Kōhai</b><span class="mini">Sakura petals</span></div>
+    <div class="fr"><div class="av f2">S</div><b>Senpai</b><span class="mini">Teal ribbon</span></div>
+    <div class="fr"><div class="av f3">O</div><b>Otaku</b><span class="mini">Akiba neon</span></div>
+    <div class="fr"><div class="av f4">S</div><b>Sensei</b><span class="mini">Gold brush</span></div>
+    <div class="fr"><div class="av f5">S</div><b>Shōgun</b><span class="mini">Kabuto crest</span></div>
+    <div class="fr"><div class="av f6">K</div><b>Kami</b><span class="mini">Living aura</span></div>
+  </div>
+  <p class="note">Swatches show the idea of each frame, not final art.</p>
+
+  <div class="grid2">
+    <div class="box"><h3>Avatar</h3><ul><li>Chibi avatar built in onboarding: face, hair, colour, outfit</li><li>Partner mascot lends a costume piece (TAKU backpack, Momo bow, Puri headset)</li><li>More parts from capsule pulls, the cosmetics shop and event drops</li><li><b>Frames come from rank only.</b> They can't be bought, so they always mean something.</li></ul></div>
+    <div class="box"><h3>Titles and badges</h3><ul><li>Title = rank + stars by default ("Senpai ★★")</li><li>Badges are earned achievements, each named and with an unlock condition ("Quiz Ronin: 10 perfect scores")</li><li>Equip one badge to show beside your name</li><li>Event badges ("Ōta TOKYO Delhi 2026, checked in") are exclusive</li></ul></div>
+  </div>
+
+  <h3>How a comment looks</h3>
+  <div class="comments" aria-label="Example comments">
+    <div class="cm"><div class="av f5">AK</div><div><div class="meta"><b>Akatsujuro</b><span class="title-chip">Shōgun ★</span><span class="pill p-puri">Quiz Ronin</span><span class="mini">2 h</span></div><p>Zenbu Kimi no Sei da. live would go crazy at Yashobhoomi.</p></div></div>
+    <div class="cm"><div class="av f2">KP</div><div><div class="meta"><b>Kavya Pillai</b><span class="title-chip">Senpai ★★</span><span class="pill p-taku">Idea backer</span><span class="mini">5 h</span></div><p>Voted DARUMA Rollin'. Their kimono stage outfits are the best.</p></div></div>
+    <div class="cm"><div class="av f1">MM</div><div><div class="meta"><b>Mm</b><span class="title-chip">Kōhai</span><span class="mini">1 d</span></div><p>Anyone going on day 2?</p></div></div>
+  </div>
+  <p class="note">Example data. Tapping a frame or title opens a small card where the owning mascot explains that rank.</p>
+</section>
+
+<!-- ===== LOOPS ===== -->
+<section id="loops">
+  <h2>Daily systems</h2>
+  <div class="grid2">
+    <div class="box"><h3>Quest board <span class="pill p-all">Home</span></h3>
+      <ul><li>3 daily quests, one from each mascot (e.g. TAKU: watch 2 reels · Puri: play the Daily Challenge · Momo: check in)</li><li>Every quest row is a button that takes you straight to the task</li><li>Clearing all three: +150 Ōra and a Standard ticket</li><li>7 weekly quests, a bigger reward and a Rare+ ticket</li></ul></div>
+    <div class="box"><h3>Streak <span class="pill p-momo">Momo</span></h3>
+      <ul><li>Kept by finishing the Daily Challenge</li><li>Flame grows at 3, 7, 30 and 100 days and raises the Ōra multiplier</li><li>Encore shields cover one missed day each (earned at 7 days, or 500 Ōra, hold 2)</li><li>At 8 pm Momo sends one nudge if the streak is at risk. That's the only nudge of the day.</li></ul></div>
+    <div class="box"><h3>Cheers <span class="pill p-taku">TAKU</span></h3>
+      <ul><li>Daily votes for the Fan Council, renamed Cheers</li><li>3 a day, rising to 6 at Kami</li><li>Shown as glowsticks on the Fan Council screen</li><li>Unused Cheers expire at midnight</li></ul></div>
+    <div class="box"><h3>Battles &amp; leaderboards <span class="pill p-puri">Puri</span></h3>
+      <ul><li>Ties broken by total answer time, then by who finished first</li><li>Your own row is always pinned at the bottom of the list</li><li>Weekly Arena: brackets of 30 players near your rank, top 3 rewarded on Sunday night</li><li>Difficulty is one consistent label: Beginner, Intermediate or Advanced</li></ul></div>
+  </div>
+</section>
+
+<!-- ===== GACHA ===== -->
+<section id="gacha">
+  <h2>Momo's capsule machine</h2>
+  <p>Three ticket tiers stay, with odds always shown next to the Pull button. With no tickets, the machine offers a pull for Ōra and links to the next quest that drops a ticket.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Ticket</th><th>Where it comes from</th><th>Common</th><th>Rare</th><th>Epic</th><th>Legendary</th><th>Pity</th></tr></thead>
+    <tbody>
+      <tr><td><b>Standard</b></td><td>Check-in, Daily Challenge, daily quests, star-ups, or 300 Ōra</td><td class="n">70%</td><td class="n">25%</td><td class="n">5%</td><td class="n">—</td><td>10th pull is Epic</td></tr>
+      <tr><td><b>Rare+</b></td><td>Weekly quests, 7-day streaks, rank-ups, or 1,200 Ōra from Senpai</td><td class="n">—</td><td class="n">70%</td><td class="n">27%</td><td class="n">3%</td><td>20th pull is Legendary</td></tr>
+      <tr><td><b>Legend</b></td><td>Event check-in, rank-ups from Sensei</td><td class="n">—</td><td class="n">—</td><td class="n">80%</td><td class="n">20%</td><td>5th pull is Legendary</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="box"><h3>Prize pool</h3><ul><li>Avatar parts and stickers (Common–Epic)</li><li>Mascot trading cards: digital, with a Legendary holo set</li><li>Shop coupons (5–20% off) that apply automatically at checkout</li><li>Event perks: fast-lane pass, sushi workshop seat, meet-and-greet raffle entry (Legendary)</li></ul></div>
+    <div class="box"><h3>Rules</h3><ul><li>Duplicates convert back to Ōra (20 / 60 / 150 / 500 by rarity)</li><li>No real-money pulls; tickets come only from play or Ōra</li><li>Capsule colour hints at the rarity before it opens</li><li>Prizes go to the Cabinet, sorted by expiry with a "use now" button</li></ul></div>
+  </div>
+</section>
+
+<!-- ===== COUNCIL ===== -->
+<section id="council">
+  <h2>Fan Council (voting)</h2>
+  <p>Ideas move through stages with real goals, so the progress bar always shows the next step and never sits at 100%.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Stage</th><th>Goal</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-taku">1 · Spark</span></td><td class="n">100 Cheers in 14 days</td><td>New idea, visible to everyone; TAKU checks it for duplicates and content rules</td></tr>
+      <tr><td><span class="pill p-taku">2 · Hype</span></td><td class="n">500 Cheers in 21 days</td><td>Featured in Discover; creator gets +200 Ōra</td></tr>
+      <tr><td><span class="pill p-ora">3 · Council review</span></td><td>Ōta team decides</td><td>Shows "Under review" with an expected decision date</td></tr>
+      <tr><td><span class="pill p-momo">4 · Confirmed</span></td><td>—</td><td>Momo announces it; backers get the Backer badge, +100 Ōra and early access</td></tr>
+      <tr><td><span class="pill p-momo">5 · Live</span></td><td>—</td><td>Becomes a product in the shop or an act on the event stage, linked from the idea</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note"><b>Polls</b> (like "which artist should we invite?") are a separate card type: fixed options, a deadline, one Cheer each, and results shown after you vote.</p>
+</section>
+
+<!-- ===== FLOWS ===== -->
+<section id="flows">
+  <h2>User flows</h2>
+  <div class="legend"><span class="pill p-taku">TAKU</span><span class="pill p-puri">Puri</span><span class="pill p-momo">Momo</span><span class="pill p-ora">Ōra / system</span></div>
+
+  <div class="flow">
+    <div class="hd"><h3>1 · Onboarding</h3><span class="mini">~3 min · ends at Kōhai</span></div>
+    <p>Mascots introduce themselves and ask their own questions instead of a long survey form. Every step pays Ōra, so the first boss fight lands before the user ever sees Home.</p>
+<pre class="mermaid">
+flowchart TD
+  A["Splash: 3 mascots run on screen"]:::ora --> B["Momo: Welcome to Ōta!<br/>3 swipe cards, one per mascot · Skip"]:::momo
+  B --> C["Sign in: phone OTP or Google"]:::ora
+  C --> D["Pick your partner"]:::ora
+  D --> E["TAKU asks: favourite anime?<br/>→ auto-join communities · +40 Ōra"]:::taku
+  E --> F["Puri asks: what do you play?<br/>→ quiz recommendations · +30 Ōra"]:::puri
+  F --> G["Momo asks: what's your event goal?<br/>→ event hub · +30 Ōra"]:::momo
+  G --> H["Build your avatar<br/>partner lends a costume · +50 Ōra"]:::ora
+  H --> I["Puri: warm-up battle<br/>3 easy questions · up to +250 Ōra"]:::puri
+  I --> J["Welcome bonus +100 Ōra"]:::ora
+  J --> K["Power hits 500"]:::ora
+  K --> L["Boss cutscene: Spoiler Kappa<br/>→ Kōhai, sakura frame"]:::ora
+  L --> M["Momo gives first Standard ticket<br/>→ guided first pull"]:::momo
+  M --> N["Home: quest board, tour tooltips"]:::ora
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+    <p>T-shirt size and merch style move out of onboarding and get asked at the first merch checkout. Skipping a question costs only that step's Ōra; the warm-up battle plus the bonus still reach 500 if the user answers all three correctly, and the welcome bonus tops up a user who doesn't.</p>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>2 · Daily loop from Home</h3><span class="mini">the retention engine</span></div>
+<pre class="mermaid">
+flowchart LR
+  O["Open app"]:::ora --> H["Home: partner greets you<br/>streak flame, quest board"]:::ora
+  H --> Q1["Momo: check in<br/>+20, Standard ticket"]:::momo
+  H --> Q2["Puri: Daily Challenge"]:::puri
+  H --> Q3["TAKU: watch 2 reels"]:::taku
+  Q1 --> B{"All 3 done?"}:::ora
+  Q2 --> B
+  Q3 --> B
+  B -- yes --> R["+150 Ōra, Standard ticket<br/>mascot trio cheer"]:::ora
+  R --> P["Ōra chip fills"]:::ora
+  P --> S{"Crossed a star<br/>or rank?"}:::ora
+  S -- star --> T["Partner toast"]:::ora
+  S -- rank --> U["Boss cutscene"]:::ora
+  H --> G["Pull tickets at Stage"]:::momo
+  H --> V["Spend Cheers in Fan Council"]:::taku
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>3 · Quiz battle</h3><span class="pill p-puri">Puri</span></div>
+<pre class="mermaid">
+flowchart TD
+  A["Battle tab"]:::puri --> B["Pick Daily Challenge or a quiz<br/>difficulty, 5 questions, Ōra on offer"]:::puri
+  B --> C["Pre-match: you vs a rival ghost<br/>near your rank"]:::puri
+  C --> D["Question with timer<br/>Puri sweats when time is low"]:::puri
+  D --> E{"Answer"}:::puri
+  E -- right --> F["Instant green flash, +Ōra pops<br/>combo meter, Puri cheers"]:::puri
+  E -- wrong --> G["Correct answer shown<br/>TAKU pops in with a note on the word"]:::taku
+  F --> H{"More questions?"}:::puri
+  G --> H
+  H -- yes --> D
+  H -- no --> I["Results card: score, time,<br/>Ōra breakdown, ticket earned"]:::ora
+  I --> J["Leaderboard with you pinned<br/>ties broken by time"]:::puri
+  I --> K["Ōra bar fills → star-up or boss"]:::ora
+  J --> L["Rematch rival · Review answers · Share"]:::puri
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>4 · Capsule pull</h3><span class="pill p-momo">Momo</span></div>
+<pre class="mermaid">
+flowchart TD
+  A["Stage tab or Home ticket button"]:::momo --> B["Capsule machine<br/>tier tabs, ticket counts, odds"]:::momo
+  B --> C{"Have a ticket?"}:::momo
+  C -- yes --> D["Pull"]:::momo
+  C -- no --> E["Pull for 300 Ōra<br/>or Next ticket: finish Daily Challenge →"]:::momo
+  E --> D
+  E -.-> Q["Jumps to Battle"]:::puri
+  D --> F["Momo cranks the handle<br/>capsule colour hints rarity"]:::momo
+  F --> G{"Rarity"}:::momo
+  G -- "Common / Rare" --> H["Momo wink + confetti"]:::momo
+  G -- Epic --> I["Screen flash, TAKU joins"]:::taku
+  G -- Legendary --> J["All three mascots celebrate<br/>holo card reveal"]:::ora
+  H --> K["Prize card: Equip · Use now · Go to Cabinet"]:::momo
+  I --> K
+  J --> K
+  K --> L{"Duplicate?"}:::momo
+  L -- yes --> M["Converts to Ōra"]:::ora
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>5 · Fan Council</h3><span class="pill p-taku">TAKU</span> <span class="pill p-momo">Momo</span></div>
+<pre class="mermaid">
+flowchart TD
+  A["Discover → Fan Council"]:::taku --> B["Cheers left today: glowsticks 2/3"]:::taku
+  B --> C["Filter: Merch · Events · Guests · Polls<br/>Sort: Trending · Ending soon · Closest to goal"]:::taku
+  C --> D["Idea card: stage, Cheers vs stage goal,<br/>creator with rank frame"]:::taku
+  D --> E["Idea detail"]:::taku
+  E --> F{"Idea or poll?"}:::taku
+  F -- idea --> G["Cheer: TAKU wotagei dance<br/>+10 Ōra, glowstick used"]:::taku
+  F -- poll --> H["Pick option → Cheer<br/>results revealed"]:::taku
+  G --> I{"Stage goal reached?"}:::taku
+  I -- yes --> J["Stage-up banner, creator +200 Ōra"]:::ora
+  J --> K["Confirmed: Momo announces<br/>backers get badge + early access"]:::momo
+  K --> L["Live: shop product or event act"]:::momo
+  A --> N["Have an idea? (Otaku rank+)<br/>title, type, images, location"]:::taku
+  N --> O["Spark stage"]:::taku
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>6 · Shop and event tickets</h3><span class="pill p-momo">Momo</span></div>
+<pre class="mermaid">
+flowchart TD
+  A["Stage tab"]:::momo --> B["Event hub: Ōta TOKYO Delhi<br/>countdown to Momo's debut"]:::momo
+  A --> C["Shop: Merch · Tickets<br/>prices in ₹, Ōra discount shown"]:::momo
+  B --> D["Ticket product"]:::momo
+  C --> D
+  C --> M["Merch product"]:::momo
+  D --> E["Pick tier: General · Prime · VIP<br/>side-by-side perks, pick day"]:::momo
+  M --> N["Pick size, asked once and remembered"]:::momo
+  E --> F["Checkout: Cabinet coupon auto-applied<br/>Ōra slider, capped by rank"]:::momo
+  N --> F
+  F --> G["Pay"]:::momo
+  G --> H["Momo hands over the ticket<br/>+1 Ōra per ₹10"]:::momo
+  H --> I["My tickets: QR in wallet"]:::momo
+  I --> J["Event day: Check in chip on Home"]:::momo
+  J --> K["Scan at gate: +1,000 Ōra<br/>Legend ticket, event badge"]:::ora
+  K --> L["Booth stamps: +100 each"]:::ora
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef puri fill:#fbf0d2,stroke:#a87a0c,color:#2e2204
+  classDef momo fill:#fbe3e5,stroke:#cf3f4b,color:#3a1418
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+
+  <div class="flow">
+    <div class="hd"><h3>7 · Discover and communities</h3><span class="pill p-taku">TAKU</span></div>
+<pre class="mermaid">
+flowchart LR
+  A["Discover tab"]:::taku --> B["Reel feed<br/>chips: Anime · Cosplay · Japan · Learn"]:::taku
+  B --> C["Watch to end: +10 Ōra<br/>quest ticks"]:::taku
+  B --> D["Comment: rank frame + title shown"]:::taku
+  A --> E["Word of the day card<br/>TAKU says it, tap to learn: +20"]:::taku
+  A --> F["Communities: joined first,<br/>then picks from onboarding"]:::taku
+  F --> G["Community page: owner with frame,<br/>top members by Ōra this week"]:::taku
+  G --> H["Join · Feed · Report"]:::taku
+  classDef taku fill:#e3eaf8,stroke:#4f73c4,color:#17203d
+  classDef ora fill:#ece7ff,stroke:#6a4be0,color:#1d1240
+</pre>
+  </div>
+</section>
+
+<!-- ===== MOMENTS ===== -->
+<section id="moments">
+  <h2>Mascot moments</h2>
+  <p>The catalogue of mascot interactions for design and animation. Each one has a trigger, so engineering knows when it fires.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Moment</th><th>Who</th><th>Trigger</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>Home greeting</td><td><span class="pill p-all">Partner</span></td><td>Open Home</td><td>Line changes by time of day and state ("Streak's at 6! One more for the ×1.2 boost")</td></tr>
+      <tr><td>Tap a mascot</td><td><span class="pill p-all">Any</span></td><td>Tap on Home</td><td>Random line or idle animation; Puri sometimes pulls a console out of his mouth</td></tr>
+      <tr><td>Combo hype</td><td><span class="pill p-puri">Puri</span></td><td>3+ right answers in a row</td><td>Combo counter, Puri pumps fists, sound sting</td></tr>
+      <tr><td>Time pressure</td><td><span class="pill p-puri">Puri</span></td><td>Under 5 s left</td><td>Puri sweats, timer pulses (red only in the last 5 s)</td></tr>
+      <tr><td>Wrong answer</td><td><span class="pill p-taku">TAKU</span></td><td>Incorrect answer</td><td>TAKU slides in with a one-line note ("ダーリン comes from English 'darling'")</td></tr>
+      <tr><td>Cheer cast</td><td><span class="pill p-taku">TAKU</span></td><td>Spend a Cheer</td><td>Wotagei glowstick swing; glowstick count drops</td></tr>
+      <tr><td>Word of the day</td><td><span class="pill p-taku">TAKU</span></td><td>Open Discover</td><td>TAKU holds a card with the word, reading and meaning</td></tr>
+      <tr><td>Capsule pull</td><td><span class="pill p-momo">Momo</span></td><td>Pull</td><td>Momo cranks the machine; reaction scales with rarity</td></tr>
+      <tr><td>Purchase done</td><td><span class="pill p-momo">Momo</span></td><td>Payment succeeds</td><td>Momo hands over the ticket or bag, confetti, Ōra flies to chip</td></tr>
+      <tr><td>Streak at risk</td><td><span class="pill p-momo">Momo</span></td><td>8 pm, no Daily Challenge yet</td><td>One push and an inbox message: "Don't leave me hanging before my debut!"</td></tr>
+      <tr><td>Streak saved</td><td><span class="pill p-momo">Momo</span></td><td>Encore shield used</td><td>Momo holds up the shield, flame relights</td></tr>
+      <tr><td>Event countdown</td><td><span class="pill p-momo">Momo</span></td><td>Before 28 Nov</td><td>"Momo's debut in 29 days" card on Home and Stage</td></tr>
+      <tr><td>Star-up</td><td><span class="pill p-all">Partner</span></td><td>Power crosses a star</td><td>Edge pop-in toast, 2 s</td></tr>
+      <tr><td>Rank-up</td><td><span class="pill p-ora">All three</span></td><td>Power crosses a rank</td><td>Boss cutscene</td></tr>
+      <tr><td>Empty states</td><td><span class="pill p-all">Owner</span></td><td>No tickets, no ideas, no results</td><td>Owning mascot plus one button that fixes it (Momo: "Play today's challenge for a ticket")</td></tr>
+      <tr><td>Loading</td><td><span class="pill p-all">All three</span></td><td>Waits over 400 ms</td><td>The trio runs across the bottom edge</td></tr>
+      <tr><td>Offline / error</td><td><span class="pill p-puri">Puri</span></td><td>Network error</td><td>"Lag spike!" with Retry</td></tr>
+      <tr><td>Rank explainer</td><td><span class="pill p-all">Owner</span></td><td>Tap any frame or title</td><td>Small card: rank, Power, how they earned it</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===== FIXES ===== -->
+<section id="fixes">
+  <h2>Old problems and their fixes</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Problem in the current app</th><th>Fix in this blueprint</th></tr></thead>
+    <tbody>
+      <tr><td>Five unexplained counters (points, XP, tickets, votes, streak)</td><td>One stat, Ōra, with Power and Wallet; tickets and Cheers are items, shown on Home</td></tr>
+      <tr><td>Leaderboard full of tied 1000s</td><td>Time tiebreak, your row pinned, Weekly Arena brackets</td></tr>
+      <tr><td>Ticket tiers buried in description text</td><td>Tier picker with side-by-side perks before checkout</td></tr>
+      <tr><td>Floating bell covering cards</td><td>Bell removed; mascot inbox in the top bar</td></tr>
+      <tr><td>Vote bars stuck at 100% (1,720 / 100)</td><td>Staged goals; the bar always shows the next stage</td></tr>
+      <tr><td>Gacha dead end at 0 tickets</td><td>Pull for Ōra, plus a button to the next ticket-earning quest</td></tr>
+      <tr><td>"Beginner" quiz tagged "Intermediate"</td><td>One difficulty field, shown once</td></tr>
+      <tr><td>Tab names ≠ screen titles</td><td>Tab label and title always match; each tab has one host</td></tr>
+      <tr><td>Long one-page survey, T-shirt size up front</td><td>Three short mascot chats with progress, each skippable; size asked at first merch checkout</td></tr>
+      <tr><td>"B-E" rank code, tiny badge icons, "0% cashback" perk</td><td>Named ranks, big frames, named badges, perks phrased as gains</td></tr>
+      <tr><td>Timer always red, no answer feedback</td><td>Instant right/wrong per question, red only in the last 5 s, results card</td></tr>
+      <tr><td>Test data and blank shop tiles</td><td>Mascot empty states; launch checklist to purge test content</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===== DEMO ===== -->
+<section id="demo">
+  <h2>Demo script</h2>
+  <p>One continuous path, about 6 minutes, that shows every system. Seed the demo account so step 6 crosses into Senpai.</p>
+  <ol class="script">
+    <li><b>Launch</b>: mascot splash, Momo's welcome cards, pick Puri as partner.</li>
+    <li><b>Mascot chats</b>: pick Darling in the FranXX and Jujutsu Kaisen for TAKU, Mobile for Puri, Meeting voice actors for Momo. Ōra ticks up after each.</li>
+    <li><b>Avatar</b>: build a chibi, Puri lends a headset.</li>
+    <li><b>Warm-up battle</b>: answer the ダーリン question, see the combo and TAKU's note on a wrong answer.</li>
+    <li><b>First boss</b>: Spoiler Kappa cutscene → Kōhai, sakura frame. Momo hands over a Standard ticket.</li>
+    <li><b>First pull</b>: guided pull reveals a Rare sticker. (Switch to the seeded account at 2,900 Power.) Clear the daily quest board; the +150 crosses 3,000 and Filler Tanuki falls → Senpai.</li>
+    <li><b>Fan Council</b>: cheer the DARUMA Rollin' poll, watch TAKU's glowsticks, see an idea move from Spark to Hype.</li>
+    <li><b>Stage</b>: open Ōta TOKYO Delhi, pick Prime, see the auto-applied coupon and the Ōra slider capped at 10%, pay, get the QR ticket from Momo.</li>
+    <li><b>Social proof</b>: open a comment thread and see frames and titles; tap a frame for the rank card.</li>
+    <li><b>Me</b>: journey map with two bosses defeated, replay one fight.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Still to decide</h2>
+  <div class="grid2">
+    <div class="box"><ul><li>Visual style and final art for frames, bosses and capsules</li><li>Whether Kōhai to Senpai should be quicker for day-1 retention</li><li>Who runs Council review and how decision dates are published</li></ul></div>
+    <div class="box"><ul><li>Legal check on gacha odds disclosure and the "no real-money pulls" rule</li><li>Whether mascot voice lines are text only or voiced</li><li>Moderation for idea submissions and comments</li></ul></div>
+  </div>
+  <p class="note">Built on the <a href="https://claude.ai/artifact/Wu5uxEJHXxAN2BPXSdnQii">Ota Life teardown</a>. Mascot art from the Ōta TOKYO character sheet.</p>
+</section>
+</main>
+</div>
