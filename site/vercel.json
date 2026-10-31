@@ -1,0 +1,4 @@
+{
+  "cleanUrls": false,
+  "rewrites": [{ "source": "/app/:path((?!_expo/|assets/|favicon).*)", "destination": "/app/index.html" }]
+}
