@@ -1,4 +1,4 @@
-node_modules/
+ota-life-app/node_modules/
 .expo/
 dist/
 web-build/
