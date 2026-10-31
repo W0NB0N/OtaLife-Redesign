@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Ōta Life",
+    "slug": "ota-life",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#120F2A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.otalife.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#120F2A"
+        }
+      ]
+    ],
+    "scheme": "otalife",
+    "backgroundColor": "#120F2A",
+    "description": "Ōta Life: anime quizzes, capsules, communities and the Ōta TOKYO festival, hosted by TAKU-kun, Momo-chan and Puri-kun."
+  }
+}
