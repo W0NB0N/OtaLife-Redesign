@@ -31,8 +31,13 @@ export function T({ size = 15, color = C.text, w = 'bold', center, style, ...p }
   const fam = { reg: F.bodyReg, bold: F.body, heavy: F.bodyBold, black: F.bodyHeavy }[w];
   return <Text {...p} style={[{ fontFamily: fam, fontSize: size, color: readable(color), lineHeight: size * 1.32 }, center && { textAlign: 'center' }, style]} />;
 }
+// Fredoka (the display font) has no precomposed Ō/ō, so Android swaps in a system font for that one
+// letter. It does have the combining macron, so spell the letter as O + U+0304 and let the font draw it.
+export const macron = (s: string) => s.replace(/Ō/g, 'Ō').replace(/ō/g, 'ō');
+const macronKids = (c: React.ReactNode): React.ReactNode => (typeof c === 'string' ? macron(c) : Array.isArray(c) ? c.map(macronKids) : c);
+
 export function H({ size = 24, color = C.text, center, style, ...p }: TP) {
-  return <Text {...p} style={[{ fontFamily: F.display, fontSize: size, color: readable(color), lineHeight: size * 1.12, letterSpacing: -0.2 }, center && { textAlign: 'center' }, style]} />;
+  return <Text {...p} style={[{ fontFamily: F.display, fontSize: size, color: readable(color), lineHeight: size * 1.12, letterSpacing: -0.2 }, center && { textAlign: 'center' }, style]}>{macronKids(p.children)}</Text>;
 }
 export const Over = ({ children, color = C.mute, style }: { children: React.ReactNode; color?: string; style?: StyleProp<TextStyle> }) => (
   <Text style={[{ fontFamily: F.bodyHeavy, fontSize: 11, letterSpacing: 1.2, textTransform: 'uppercase', color: readable(color) }, style]}>{children}</Text>
@@ -42,7 +47,7 @@ export const Over = ({ children, color = C.mute, style }: { children: React.Reac
 export function JpText({ text, size = 18, color = C.text, hi = C.pink, display }: { text: string; size?: number; color?: string; hi?: string; display?: boolean }) {
   const parts = text.split(/(〔[^〕]+〕)/g);
   const base = { fontFamily: display ? F.display : F.body, fontSize: size, color, lineHeight: size * 1.3 };
-  return <Text style={base}>{parts.map((p, i) => p.startsWith('〔') ? <Text key={i} style={{ color: hi, fontWeight: '900' }}>{p.slice(1, -1)}</Text> : p)}</Text>;
+  return <Text style={base}>{parts.map((p, i) => p.startsWith('〔') ? <Text key={i} style={{ color: hi, fontWeight: '900' }}>{display ? macron(p.slice(1, -1)) : p.slice(1, -1)}</Text> : display ? macron(p) : p)}</Text>;
 }
 
 /* ---------- pressable that springs ---------- */
@@ -136,7 +141,7 @@ export function useCountUp(target: number, ms = 700) {
 }
 export function Num({ value, style, prefix = '', suffix = '', ms }: { value: number; style?: StyleProp<TextStyle>; prefix?: string; suffix?: string; ms?: number }) {
   const v = useCountUp(value, ms);
-  return <Text style={style}>{prefix}{fmt(v)}{suffix}</Text>;
+  return <Text style={style}>{macron(prefix)}{fmt(v)}{macron(suffix)}</Text>;
 }
 
 /* ---------- progress bar that grows ---------- */
@@ -156,7 +161,7 @@ export function Bar({ pct, color = C.ora, track = C.card2, height = 12, delay = 
 /* ---------- speech bubble ---------- */
 export function Bubble({ text, tail = 'left', style, small }: { text: string; tail?: 'left' | 'right' | 'down'; style?: StyleProp<ViewStyle>; small?: boolean }) {
   return (
-    <Animated.View key={text} entering={ZoomIn.springify().damping(14)} style={[st.bubble, tail === 'left' && { borderBottomLeftRadius: 6 }, tail === 'right' && { borderBottomRightRadius: 6 }, style]}>
+    <Animated.View key={text} entering={ZoomIn.duration(360)} style={[st.bubble, tail === 'left' && { borderBottomLeftRadius: 6 }, tail === 'right' && { borderBottomRightRadius: 6 }, style]}>
       <Text style={{ fontFamily: F.bodyHeavy, fontSize: small ? 13 : 14.5, color: C.ink, lineHeight: (small ? 13 : 14.5) * 1.3 }}>{text}</Text>
     </Animated.View>
   );

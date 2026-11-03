@@ -30,7 +30,7 @@ export default function Inbox() {
     <Screen>
       <BackBar title="Mascot inbox" sub={`${msgs.length} messages`} />
       {msgs.map((m, i) => (
-        <Animated.View key={m.title} entering={FadeInDown.delay(i * 60).springify()}>
+        <Animated.View key={m.title} entering={FadeInDown.delay(i * 60).duration(360)}>
           <Card color={DOMAIN[m.who].deep} style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
             <View style={{ width: 54, height: 54, borderRadius: 18, overflow: 'hidden', backgroundColor: DOMAIN[m.who].fill, alignItems: 'center', justifyContent: 'flex-end' }}>
               <MascotStill who={m.who} state={m.who === 'momo' ? 'sparkle' : m.who === 'puri' ? 'gg' : 'wotagei'} size={70} acc={m.who === 'puri' ? 'headset' : null} />

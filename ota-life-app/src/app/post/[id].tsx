@@ -48,7 +48,7 @@ export default function PostDetail() {
           </Row>
         ))}
         {mine.map(c => (
-          <Animated.View key={c.id} entering={FadeInDown.springify()}>
+          <Animated.View key={c.id} entering={FadeInDown.duration(360)}>
             <Row style={styles.cm}>
               <Avatar size={34} />
               <View style={{ flex: 1, gap: 2 }}>

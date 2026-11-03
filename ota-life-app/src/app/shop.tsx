@@ -39,7 +39,7 @@ export default function Shop() {
       </Card>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {list.map((p, i) => (
-          <Animated.View key={p.id} entering={FadeInDown.delay(i * 50).springify()} style={{ width: '48%', flexGrow: 1 }}>
+          <Animated.View key={p.id} entering={FadeInDown.delay(i * 50).duration(360)} style={{ width: '48%', flexGrow: 1 }}>
             <Press onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id } })} style={styles.prod}>
               <View style={[styles.art, { backgroundColor: p.color + '26' }]}>
                 <ProductArt p={p} size={140} />

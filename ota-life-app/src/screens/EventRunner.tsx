@@ -87,7 +87,7 @@ function Cutscene({ idx }: { idx: number }) {
         )}
         {beat === 'overload' && (
           <View style={styles.center}>
-            <Animated.Text entering={ZoomIn.springify().damping(10)} style={styles.overload}>ŌRA{'\n'}OVERLOAD</Animated.Text>
+            <Animated.Text entering={ZoomIn.duration(360)} style={styles.overload}>ŌRA{'\n'}OVERLOAD</Animated.Text>
             <View style={{ width: width - 60, height: 22, borderRadius: 11, backgroundColor: C.card2, overflow: 'hidden', marginTop: 24 }}>
               <Animated.View entering={FadeIn} style={{ flex: 1, backgroundColor: C.lime }} />
             </View>
@@ -111,7 +111,7 @@ function Cutscene({ idx }: { idx: number }) {
         {beat === 'spoils' && (
           <View style={[styles.center, { paddingHorizontal: 20, gap: 14 }]}>
             <Rays color={RANKS[idx].frame} size={width * 1.6} />
-            <Animated.View entering={ZoomIn.springify().damping(9)}><Avatar size={110} power={r.min} /></Animated.View>
+            <Animated.View entering={ZoomIn.duration(360)}><Avatar size={110} power={r.min} /></Animated.View>
             <Over color={C.lime}>{fresh ? 'Rank up' : 'Replay'} · {boss.name} defeated</Over>
             <H size={36} center color="#FFFFFF">You’re {r.name}!</H>
             <Card style={{ width: '100%', maxWidth: 360 }} color="#FFFFFF">

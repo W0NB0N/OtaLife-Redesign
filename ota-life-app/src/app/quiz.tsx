@@ -129,7 +129,7 @@ export default function Quiz() {
           <Mascot who="puri" state={puri} size={180} acc="headset" />
         </View>
 
-        <Animated.View key={'q' + i} entering={FadeInDown.springify().damping(16)}>
+        <Animated.View key={'q' + i} entering={FadeInDown.duration(360)}>
           <Card color={C.card} style={{ gap: 8 }}>
             <Over color={C.puri}>{mode === 'daily' ? 'Daily Challenge' : mode === 'warmup' ? 'Warm-up battle' : QUIZ_CATS.find(c => c.id === cat)?.name} · {i + 1} of {questions.length}{rewarded ? ` · +${Math.round(per * streakMult(g.streak.count))} Ōra` : ' · practice'}</Over>
             <JpText text={q.q} size={20} display />
@@ -139,7 +139,7 @@ export default function Quiz() {
         {q.o.map((o, k) => {
           const isRight = picked !== null && k === q.a, isWrong = picked === k && k !== q.a, dim = picked !== null && !isRight && !isWrong;
           return (
-            <Animated.View key={i + '-' + k} entering={FadeInDown.delay(80 + k * 60).springify().damping(16)}>
+            <Animated.View key={i + '-' + k} entering={FadeInDown.delay(80 + k * 60).duration(360)}>
               <Press onPress={e => answer(k, e)} disabled={picked !== null && !isRight && !isWrong ? false : false} haptics={false}
                 style={[styles.ans, isRight && { backgroundColor: C.lime }, isWrong && { backgroundColor: C.red }, dim && { opacity: 0.45 }]}>
                 <View style={[styles.key, (isRight || isWrong) && { backgroundColor: '#FFFFFF' }]}><T w="black" color={isRight || isWrong ? C.ink : C.text}>{'ABCD'[k]}</T></View>
@@ -152,7 +152,7 @@ export default function Quiz() {
         })}
 
         {picked !== null && (
-          <Animated.View entering={FadeInUp.springify().damping(16)} style={{ gap: 12 }}>
+          <Animated.View entering={FadeInUp.duration(360)} style={{ gap: 12 }}>
             <Row style={{ alignItems: 'flex-end' }}>
               <Mascot who="taku" state={picked === q.a ? 'happy' : 'think'} size={86} />
               <View style={[styles.note]}>
@@ -227,14 +227,14 @@ function Results({ mode, cat, right, total, best, earned, time, rewarded }: { mo
           <Blob seed="results" color={win ? C.puriSoft : C.card} size={250} second={win ? '#FFC93C33' : undefined} style={{ position: 'absolute', top: 0 }} />
           <Mascot who="puri" state={win ? 'victory' : 'cry'} size={200} acc="headset" />
         </View>
-        <Animated.View entering={ZoomIn.springify().damping(12)}><H size={34} center>{win ? (perfect ? 'Flawless. GG!' : 'Victory! GG') : 'GG, close one'}</H></Animated.View>
+        <Animated.View entering={ZoomIn.duration(360)}><H size={34} center>{win ? (perfect ? 'Flawless. GG!' : 'Victory! GG') : 'GG, close one'}</H></Animated.View>
         <T center color={C.mute}>{win ? `Best combo ×${best}.` : 'TAKU left a note on every answer. Rematch tomorrow.'}</T>
         <Row gap={8}>
           {[[`${right}/${total}`, 'correct'], [`×${best}`, 'best combo'], [mm, 'time']].map(([v, l], k) => (
-            <Animated.View key={l} entering={FadeInDown.delay(150 + k * 80).springify()} style={styles.tile}><H size={24}>{v}</H><T size={11.5} color={C.mute}>{l}</T></Animated.View>
+            <Animated.View key={l} entering={FadeInDown.delay(150 + k * 80).duration(360)} style={styles.tile}><H size={24}>{v}</H><T size={11.5} color={C.mute}>{l}</T></Animated.View>
           ))}
         </Row>
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <Animated.View entering={FadeInDown.delay(400).duration(360)}>
           <Card style={{ gap: 0 }}>
             {!rewarded && <T color={C.mute} style={{ paddingVertical: 6 }}>{mode === 'library' ? 'Practice round: this quiz already paid out today.' : 'Practice round: today\'s challenge is already cleared.'}</T>}
             {rewarded && <Line l={`${right} right × ${per(mode)} Ōra${streakMult(g.streak.count) > 1 && mode !== 'warmup' ? ` × ${streakMult(g.streak.count)}` : ''}`} v={earned} />}
@@ -246,7 +246,7 @@ function Results({ mode, cat, right, total, best, earned, time, rewarded }: { mo
           </Card>
         </Animated.View>
         {res?.ticket && (
-          <Animated.View entering={FadeInDown.delay(550).springify()}>
+          <Animated.View entering={FadeInDown.delay(550).duration(360)}>
             <Card style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Icon name="ticket" size={28} c={C.momo} />
               <T w="black" style={{ flex: 1 }}>+1 Standard capsule ticket</T>
@@ -255,7 +255,7 @@ function Results({ mode, cat, right, total, best, earned, time, rewarded }: { mo
           </Animated.View>
         )}
         {mode !== 'warmup' && (
-          <Animated.View entering={FadeInDown.delay(650).springify()}>
+          <Animated.View entering={FadeInDown.delay(650).duration(360)}>
             <Card style={{ gap: 4 }}>
               <Over>Top rankings · ties broken by time</Over>
               {board.map((r: any, k) => (

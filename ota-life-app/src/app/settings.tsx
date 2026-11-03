@@ -8,6 +8,7 @@ import { Mascot, MascotStill } from '@/mascots/Mascot';
 import { Btn, Card, H, Press, Row, T } from '@/ui/kit';
 import { BackBar, Screen } from '@/ui/game';
 import { Sheet } from '@/ui/overlays';
+import { DEMO_TOAST, seedDemo } from '@/lib/demoBridge';
 
 function Toggle({ on, onChange, label, sub }: { on: boolean; onChange: (v: boolean) => void; label: string; sub: string }) {
   return (
@@ -47,7 +48,7 @@ function ThemeCard({ name, on, onPress }: { name: ThemeName; on: boolean; onPres
 export default function Settings() {
   const g = useGame();
   const router = useRouter();
-  const [confirm, setConfirm] = useState(false);
+  const [confirm, setConfirm] = useState<null | 'reset' | 'demo'>(null);
   return (
     <Screen>
       <BackBar title="Settings" />
@@ -72,13 +73,19 @@ export default function Settings() {
         <T size={13} color={C.mute}>Progress, orders and posts are saved on this device. Clearing the app’s storage resets them.</T>
         {g.address && <T size={13}>Saved address: {g.address.name}, {g.address.city} {g.address.pin}</T>}
         {g.address && <Btn small kind="ghost" title="Forget saved address" onPress={() => { useGame.setState({ address: null }); useFx.getState().toast('momo', 'Address removed', 'We\'ll ask again at your next merch order.', 'happy'); }} />}
-        <Btn kind="ghost" title="Reset all progress" icon="trash" onPress={() => setConfirm(true)} />
+        <Btn kind="ghost" title="Load demo account" icon="sparkle" onPress={() => setConfirm('demo')} />
+        <Btn kind="ghost" title="Reset all progress" icon="trash" onPress={() => setConfirm('reset')} />
       </Card>
       <T size={12} color={C.dim} center>Ōta Life 1.0 · made for Ōta TOKYO fans</T>
-      <Sheet visible={confirm} onClose={() => setConfirm(false)} title="Reset everything?">
+      <Sheet visible={confirm === 'demo'} onClose={() => setConfirm(null)} title="Load the demo account?">
+        <Row style={{ alignItems: 'flex-end' }}><Mascot who="momo" state="excited" size={110} /><T style={{ flex: 1 }} color={C.soft}>Senpai rank 240 Ōra short of Otaku, 6,400 Ōra, tickets in every tier, a 15% coupon and a 6-day streak. It replaces your current progress.</T></Row>
+        <Btn title="Load demo account" onPress={() => { setConfirm(null); seedDemo(); router.replace('/'); setTimeout(() => useFx.getState().toast(...DEMO_TOAST), 500); }} />
+        <Btn kind="ghost" title="Keep my progress" onPress={() => setConfirm(null)} />
+      </Sheet>
+      <Sheet visible={confirm === 'reset'} onClose={() => setConfirm(null)} title="Reset everything?">
         <Row style={{ alignItems: 'flex-end' }}><Mascot who="momo" state="sad" size={110} /><T style={{ flex: 1 }} color={C.soft}>This deletes your Ōra, rank, streak, capsules, orders and posts on this device. It can’t be undone.</T></Row>
-        <Btn kind="pink" title="Yes, reset my progress" onPress={() => { setConfirm(false); g.reset(); router.replace('/onboarding'); }} />
-        <Btn kind="ghost" title="Keep my progress" onPress={() => setConfirm(false)} />
+        <Btn kind="pink" title="Yes, reset my progress" onPress={() => { setConfirm(null); g.reset(); router.replace('/onboarding'); }} />
+        <Btn kind="ghost" title="Keep my progress" onPress={() => setConfirm(null)} />
       </Sheet>
     </Screen>
   );

@@ -8,6 +8,8 @@ import { useFx } from '@/store/fx';
 import { RANKS, rankIdx } from '@/content/ranks';
 import { addDays, dayKey, uid, weekKey } from './time';
 
+export const DEMO_TOAST = ['momo', 'Demo account ready', '6,400 Ōra, tickets in every tier, a coupon and a 6-day streak.', 'sparkle'] as const;
+
 const freshDay = () => ({ key: dayKey(), checkin: false, challenge: false, challengeScore: 0, reels: [], jar: 0, word: false, cheersUsed: 0, comments: 0, quizzes: [], boardClaimed: false, ora: 0, milestone: false });
 
 /** a well-stocked account: 240 Ōra short of Otaku, a 6-day streak, tickets in every tier, a coupon */
@@ -68,7 +70,7 @@ const ACTIONS: Record<string, () => void> = {
     setTimeout(() => { if (next) g.earn(next.min - g.power, { mult: false }); else useFx.getState().setCutscene(i); }, 500);
   },
   theme: () => { const g = useGame.getState(); g.setTheme(g.settings.theme === 'pastel' ? 'night' : 'pastel'); },
-  reset: () => { seedDemo(); go('/'); setTimeout(() => useFx.getState().toast('momo', 'Demo account ready', '6,400 Ōra, tickets in every tier and a coupon.', 'sparkle'), 400); },
+  reset: () => { seedDemo(); go('/'); setTimeout(() => useFx.getState().toast(...DEMO_TOAST), 400); },
 };
 
 let installed = false;

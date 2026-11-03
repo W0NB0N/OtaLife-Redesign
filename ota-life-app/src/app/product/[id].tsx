@@ -40,7 +40,7 @@ export default function Product() {
         <BackBar title={p.name} sub={`Official merch · ★ ${p.rating} (${p.reviews})`} right={<OraChip />} />
         <View style={[styles.gallery, { backgroundColor: p.color + '2E' }]}>
           <Blob seed={p.id + 'big'} color={p.color + '55'} size={W * 0.95} second={p.color + '22'} style={{ position: 'absolute', top: 10 }} />
-          <Animated.View entering={ZoomIn.springify().damping(12)}><ProductArt p={p} size={W * 0.82} bg={false} /></Animated.View>
+          <Animated.View entering={ZoomIn.duration(360)}><ProductArt p={p} size={W * 0.82} bg={false} /></Animated.View>
           <View style={{ position: 'absolute', right: 6, bottom: 0, alignItems: 'flex-end' }}>
             <Mascot who={p.who} state="happy" size={84} acc={p.who === 'puri' ? 'headset' : null} />
           </View>

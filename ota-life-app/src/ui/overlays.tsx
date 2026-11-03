@@ -7,7 +7,7 @@ import Svg, { Path } from 'react-native-svg';
 import { C, F, R, themed } from '@/theme';
 import { useFx } from '@/store/fx';
 import { useGame } from '@/store/game';
-import { H, T, Press, Row } from './kit';
+import { H, T, Press, Row, macron } from './kit';
 import { Icon } from '@/art/Icon';
 import { MascotStill } from '@/mascots/Mascot';
 
@@ -63,7 +63,7 @@ function FloatItem({ id, x, y, text, color }: { id: number; x: number; y: number
         <Icon name="gem" size={24} c={C.ora} />
       </Animated.View>
       <Animated.Text pointerEvents="none" style={[{ position: 'absolute', left: x - 40, width: 80, top: y - 34, textAlign: 'center', fontFamily: F.display, fontSize: 22, color: color || C.lime, textShadowColor: '#000', textShadowRadius: 6 }, sText]}>
-        {text}
+        {macron(text)}
       </Animated.Text>
     </>
   );
@@ -82,7 +82,7 @@ export function ToastHost() {
   if (!t) return null;
   const bg = { taku: C.taku, momo: C.momo, puri: C.puri }[t.who];
   return (
-    <Animated.View key={t.id} entering={SlideInUp.springify().damping(16)} exiting={SlideOutUp.duration(250)} style={[st.toast, { top: ins.top + 8 }]}>
+    <Animated.View key={t.id} entering={SlideInUp.duration(360)} exiting={SlideOutUp.duration(250)} style={[st.toast, { top: ins.top + 8 }]}>
       <Pressable onPress={() => drop(t.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View style={[st.toastFace, { backgroundColor: bg }]}><MascotStill who={t.who} state={(t.state as any) || (t.who === 'puri' ? 'gg' : t.who === 'taku' ? 'wotagei' : 'sparkle')} size={66} /></View>
         <View style={{ flex: 1 }}>

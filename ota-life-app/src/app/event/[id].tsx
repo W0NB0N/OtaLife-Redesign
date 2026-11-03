@@ -59,7 +59,7 @@ export default function EventPage() {
         </Row>
         <H size={20}>{ev.tiers.length > 1 ? 'Pick a pass' : 'Your pass'}</H>
         {ev.tiers.map((x, i) => (
-          <Animated.View key={x.id} entering={FadeInDown.delay(i * 60).springify()}>
+          <Animated.View key={x.id} entering={FadeInDown.delay(i * 60).duration(360)}>
             <Press onPress={() => { setTier(x.id); haptic.tap(); }} style={[styles.opt, tier === x.id && styles.on]}>
               <Row between>
                 <Row><View style={[styles.radio, tier === x.id && { borderWidth: 7, borderColor: C.lime }]} /><H size={19}>{x.name}</H>{x.legend && <Pill color={C.puriDeep} text={C.gold}>+ Legend ticket</Pill>}</Row>

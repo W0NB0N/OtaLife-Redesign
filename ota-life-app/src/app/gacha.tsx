@@ -160,7 +160,7 @@ function Reveal({ res, onAgain, onCabinet, canAgain }: { res: { prize: Prize; du
     <Animated.View entering={FadeIn.duration(200)} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(8,5,25,0.88)', alignItems: 'center', justifyContent: 'center', gap: 14, padding: 20 }]}>
       <Rays color={R.fill} size={width * 1.8} />
       <Animated.View entering={ZoomIn.delay(150)}><Bubble text={lines[prize.r]} /></Animated.View>
-      <Animated.View entering={ZoomIn.springify().damping(10).delay(80)} style={[styles.prize, { borderColor: R.fill, shadowColor: R.fill }]}>
+      <Animated.View entering={ZoomIn.duration(360).delay(80)} style={[styles.prize, { borderColor: R.fill, shadowColor: R.fill }]}>
         <Pill color={R.soft} text={R.deep}>{R.label}</Pill>
         <View style={[styles.art, { backgroundColor: R.soft }]}>
           <Blob seed={prize.id} color="#FFFFFFAA" size={190} spin style={{ position: 'absolute' }} />

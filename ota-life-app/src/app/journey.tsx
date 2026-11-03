@@ -49,7 +49,7 @@ export default function Journey() {
         return (
           <View key={r.id} style={{ gap: 12 }}>
             {i > 0 && (
-              <Animated.View entering={FadeInDown.springify()} style={[styles.gate, { backgroundColor: done ? C.card : C.panel }]}>
+              <Animated.View entering={FadeInDown.duration(360)} style={[styles.gate, { backgroundColor: done ? C.card : C.panel }]}>
                 <Blob seed={'gate' + r.id} color={done ? C.card2 : BOSSES[r.boss!].color + '33'} size={170} spin={!done} style={{ position: 'absolute', left: -10, top: -10 }} />
                 <Boss id={r.boss!} size={130} beaten={g.beaten.includes(r.boss!) || done} />
                 <View style={{ flex: 1, gap: 4 }}>

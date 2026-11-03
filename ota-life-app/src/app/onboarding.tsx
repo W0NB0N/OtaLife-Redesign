@@ -9,9 +9,11 @@ import { C, DOMAIN, F, Who, themed } from '@/theme';
 import { useGame } from '@/store/game';
 import { Mascot, PokeMascot } from '@/mascots/Mascot';
 import { Blob, OnBlob } from '@/art/Blob';
-import { Btn, Bubble, Chip, H, Over, Press, Row, T } from '@/ui/kit';
+import { Btn, Bubble, Chip, H, Over, Press, Row, T, macron } from '@/ui/kit';
 import { OraChip } from '@/ui/game';
 import { obDraft } from '@/store/draft';
+import { useFx } from '@/store/fx';
+import { DEMO_TOAST, seedDemo } from '@/lib/demoBridge';
 
 type Step = 'hello' | 'name' | 'buddy' | 'anime' | 'platform' | 'goal' | 'warm';
 const ORDER: Step[] = ['hello', 'name', 'buddy', 'anime', 'platform', 'goal', 'warm'];
@@ -60,24 +62,30 @@ export default function Onboarding() {
         {step === 'hello' && (
           <Animated.View key="hello" entering={FadeIn.duration(500)} style={{ flex: 1, justifyContent: 'space-between', gap: 20 }}>
             <View style={{ alignItems: 'center', marginTop: 20 }}>
-              <Animated.Text entering={ZoomIn.delay(100).springify().damping(10)} style={styles.logo}>Ōta Life</Animated.Text>
+              <Animated.Text entering={ZoomIn.delay(100).duration(360)} style={styles.logo}>{macron('Ōta Life')}</Animated.Text>
               <T size={16} color={C.lime} w="black" style={{ letterSpacing: 6 }}>オタライフ</T>
             </View>
             <View style={{ height: 260, alignItems: 'center', justifyContent: 'flex-end' }}>
               <Blob seed="hello" color={C.oraDeep} size={300} second={C.heroBlob} style={{ position: 'absolute', top: -20 }} />
               <Row gap={0} style={{ alignItems: 'flex-end' }}>
-                <Animated.View entering={FadeInRight.delay(200).springify()}><PokeMascot who="taku" base="wave" size={130} style={{ marginRight: -22 }} /></Animated.View>
-                <Animated.View entering={FadeInDown.delay(350).springify()}><PokeMascot who="momo" base="sparkle" size={160} /></Animated.View>
-                <Animated.View entering={FadeInRight.delay(500).springify()}><PokeMascot who="puri" base="gg" size={125} acc="headset" style={{ marginLeft: -22 }} /></Animated.View>
+                <Animated.View entering={FadeInRight.delay(200).duration(360)}><PokeMascot who="taku" base="wave" size={130} style={{ marginRight: -22 }} /></Animated.View>
+                <Animated.View entering={FadeInDown.delay(350).duration(360)}><PokeMascot who="momo" base="sparkle" size={160} /></Animated.View>
+                <Animated.View entering={FadeInRight.delay(500).duration(360)}><PokeMascot who="puri" base="gg" size={125} acc="headset" style={{ marginLeft: -22 }} /></Animated.View>
               </Row>
             </View>
             <T center color={C.mute} size={16}>Anime, quizzes, capsules and the Ōta TOKYO festival. Everything you do earns Ōra.</T>
-            <Btn title="Get started" onPress={() => next('name')} />
+            <View style={{ gap: 6 }}>
+              <Btn title="Get started" onPress={() => next('name')} />
+              <Btn title="Explore with a demo account" kind="ghost" icon="sparkle" onPress={() => {
+                seedDemo(); router.replace('/');
+                setTimeout(() => useFx.getState().toast(...DEMO_TOAST), 500);
+              }} />
+            </View>
           </Animated.View>
         )}
 
         {step === 'name' && (
-          <Animated.View key="name" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 18 }}>
+          <Animated.View key="name" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 18 }}>
             <Row style={{ alignItems: 'flex-end' }}>
               <OnBlob seed="name" color={C.momoSoft} size={130}><Mascot who="momo" state="talk" size={120} /></OnBlob>
               <Bubble text="First things first: what should we call you?" />
@@ -92,7 +100,7 @@ export default function Onboarding() {
         )}
 
         {step === 'buddy' && (
-          <Animated.View key="buddy" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 14 }}>
+          <Animated.View key="buddy" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 14 }}>
             <Over color={DOMAIN[buddy].fill}>Step 2 · your buddy</Over>
             <H size={30}>Pick your buddy</H>
             <View style={{ height: 270, alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -115,7 +123,7 @@ export default function Onboarding() {
         )}
 
         {step === 'anime' && (
-          <Animated.View key="anime" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 14 }}>
+          <Animated.View key="anime" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 14 }}>
             <Row style={{ alignItems: 'flex-end' }}>
               <OnBlob seed="anime" color={C.takuSoft} size={130}><Mascot who="taku" state={anime.length ? 'wotagei' : 'think'} size={124} /></OnBlob>
               <Bubble text={anime.length ? `${anime.length} picked! I'll add you to their communities.` : 'What are you watching? Pick as many as you like.'} />
@@ -132,7 +140,7 @@ export default function Onboarding() {
         )}
 
         {step === 'platform' && (
-          <Animated.View key="platform" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 12 }}>
+          <Animated.View key="platform" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 12 }}>
             <Row style={{ alignItems: 'flex-end' }}>
               <OnBlob seed="plat" color={C.puriSoft} size={130}><Mascot who="puri" state={platform ? 'gg' : 'idle'} size={120} acc="headset" /></OnBlob>
               <Bubble text={platform ? 'Respect. I\'ll queue quizzes for that.' : 'Where do you play? Be honest.'} />
@@ -152,7 +160,7 @@ export default function Onboarding() {
         )}
 
         {step === 'goal' && (
-          <Animated.View key="goal" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 12 }}>
+          <Animated.View key="goal" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 12 }}>
             <Row style={{ alignItems: 'flex-end' }}>
               <OnBlob seed="goal" color={C.momoSoft} size={130}><Mascot who="momo" state={goal ? 'sparkle' : 'wave'} size={124} /></OnBlob>
               <Bubble text={goal ? 'Ahh, I\'ll save you a spot!' : 'What would make Ōta TOKYO perfect for you?'} />
@@ -172,7 +180,7 @@ export default function Onboarding() {
         )}
 
         {step === 'warm' && (
-          <Animated.View key="warm" entering={FadeInRight.springify().damping(18)} style={{ flex: 1, gap: 14 }}>
+          <Animated.View key="warm" entering={FadeInRight.duration(360)} style={{ flex: 1, gap: 14 }}>
             <View style={{ height: 300, alignItems: 'center', justifyContent: 'flex-end' }}>
               <Blob seed="warm" color={C.puriSoft} size={300} second="#FFC93C33" style={{ position: 'absolute', top: 0 }} />
               <Bubble text={{ taku: 'Last step: a warm-up battle. Three easy words. Ganbatte!', momo: 'Last step! A tiny warm-up quiz. I\'ll be cheering!', puri: 'Tutorial boss: three questions. Don\'t choke.' }[buddy]} style={{ position: 'absolute', top: 0, left: 0 }} />

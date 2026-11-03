@@ -86,7 +86,7 @@ export default function Council() {
         {IDEAS.slice().sort((a, b) => { const p = (x: typeof a) => { const n = ideaCount(g, x.id); return n < 100 ? n / 100 : (n - 100) / 400; }; return p(b) - p(a); }).map((d, i) => {
           const n = ideaCount(g, d.id), s = stageOf(n), goal = STAGES[s][1], lo = s === 0 ? 0 : 100;
           return (
-            <Animated.View key={d.id} entering={FadeInDown.delay(i * 60).springify()}>
+            <Animated.View key={d.id} entering={FadeInDown.delay(i * 60).duration(360)}>
               <Card style={{ gap: 12 }}>
                 <Row style={{ alignItems: 'flex-start' }}>
                   <View style={[styles.thumb, { backgroundColor: d.color + '33' }]}><T size={34} w="black">{d.kanji}</T></View>
@@ -108,7 +108,7 @@ export default function Council() {
                   <T w="black" size={13}>{s < 2 ? `${fmt(n)} / ${fmt(goal)} Cheers to ${STAGES[s + 1][0]}` : 'Under review by the Ōta team'}</T>
                   {s < 2 && <Btn small title={g.ideaCheers[d.id] ? `Cheer · ${g.ideaCheers[d.id]}` : 'Cheer'} kind={left ? 'lime' : 'ghost'} disabled={!left} onPress={e => cheer(d.id, e)} />}
                 </Row>
-                {staged === d.id && <Animated.View entering={ZoomIn.springify()} style={styles.stageup}><T w="black" color={C.ink}>Stage up! It moved to {STAGES[stageOf(n)][0]}. {d.by} gets +200 Ōra and it’s featured in Discover.</T></Animated.View>}
+                {staged === d.id && <Animated.View entering={ZoomIn.duration(360)} style={styles.stageup}><T w="black" color={C.ink}>Stage up! It moved to {STAGES[stageOf(n)][0]}. {d.by} gets +200 Ōra and it’s featured in Discover.</T></Animated.View>}
               </Card>
             </Animated.View>
           );

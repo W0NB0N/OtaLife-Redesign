@@ -36,12 +36,12 @@ export default function OrderPage() {
               <Blob seed="order" color={C.momoSoft} size={220} second="#FF5C9A44" style={{ position: 'absolute', top: 0 }} />
               <Mascot who="momo" state="celebrate" size={180} />
             </View>
-            <Animated.View entering={ZoomIn.springify().damping(12)}><H size={30} center>{o.kind === 'ticket' ? 'See you at my debut!' : 'Order placed!'}</H></Animated.View>
+            <Animated.View entering={ZoomIn.duration(360)}><H size={30} center>{o.kind === 'ticket' ? 'See you at my debut!' : 'Order placed!'}</H></Animated.View>
             <T center color={C.mute}>{o.kind === 'ticket' ? 'Your pass is saved in My orders. Show the QR at the gate.' : 'Track it any time in My orders. Pay on delivery.'}</T>
           </View>
         )}
         {o.kind === 'ticket' && ev ? (
-          <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.ticket}>
+          <Animated.View entering={FadeInDown.delay(200).duration(360)} style={styles.ticket}>
             <EventScene scene={ev.scene} color={ev.color} width={W} height={110} />
             <View style={{ padding: 16, gap: 2 }}>
               <Over color={ev.color}>{o.detail}</Over>

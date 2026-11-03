@@ -13,7 +13,7 @@ import { Mascot } from '@/mascots/Mascot';
 import { Blob } from '@/art/Blob';
 import { Icon } from '@/art/Icon';
 import { JarArt, TokenArt } from '@/art/Machine';
-import { H, Pill, Press, Row, T } from '@/ui/kit';
+import { H, Pill, Press, Row, T, macron } from '@/ui/kit';
 import { OraChip, goBack } from '@/ui/game';
 import { ReactBar } from '@/screens/PostCard';
 
@@ -84,7 +84,7 @@ export default function Reel() {
         <Blob seed={r.id + si} color={r.accent + '40'} size={width * 1.1} second="#FFFFFF14" style={{ position: 'absolute', right: -width * 0.35, top: height * 0.12 }} />
         <Blob seed={r.id + 'b' + si} color="#00000026" size={width * 0.8} spin={false} style={{ position: 'absolute', left: -width * 0.3, bottom: height * 0.1 }} />
         <View style={{ position: 'absolute', left: 22, right: 22, top: height * 0.24 }}>
-          <Animated.Text entering={ZoomIn.springify().damping(12)} style={{ fontFamily: F.display, fontSize: slide.big.length > 4 ? 58 : 92, lineHeight: slide.big.length > 4 ? 66 : 100, color: rc.fg }}>{slide.big}</Animated.Text>
+          <Animated.Text entering={ZoomIn.duration(360)} style={{ fontFamily: F.display, fontSize: slide.big.length > 4 ? 58 : 92, lineHeight: slide.big.length > 4 ? 66 : 100, color: rc.fg }}>{macron(slide.big)}</Animated.Text>
           <Animated.View entering={FadeInDown.delay(150)}><Pill color={r.accent} text={C.ink}>{slide.small}</Pill></Animated.View>
           <Animated.View entering={FadeInDown.delay(300)} style={{ marginTop: 18 }}><H size={24} color={rc.fg}>{slide.caption}</H></Animated.View>
         </View>

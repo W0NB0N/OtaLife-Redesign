@@ -33,7 +33,7 @@ export function ReactBar({ id, base, big }: { id: string; base: Record<Who, numb
         return (
           <View key={w}>
             {pop === w && (
-              <Animated.View entering={ZoomIn.springify().damping(10)} exiting={FadeOut} style={styles.pop} pointerEvents="none">
+              <Animated.View entering={ZoomIn.duration(360)} exiting={FadeOut} style={styles.pop} pointerEvents="none">
                 <Mascot who={w} state={RX[w].state} size={96} />
               </Animated.View>
             )}
